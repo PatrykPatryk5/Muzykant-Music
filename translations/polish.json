@@ -1,0 +1,14 @@
+{
+  "PLAY_SUCCESS": "Dodano do kolejki: **{title}**",
+  "NO_RESULTS": "Nie znaleziono wyników.",
+  "NOT_IN_VOICE": "Musisz być na kanale głosowym, aby odtwarzać muzykę.",
+  "NO_PLAYER": "Brak aktywnego odtwarzacza.",
+  "SKIP_SUCCESS": "Pominięto aktualny utwór.",
+  "PAUSE_SUCCESS": "Utwór został zatrzymany.",
+  "RESUME_SUCCESS": "Odtwarzanie zostało wznowione.",
+  "STOP_SUCCESS": "Odtwarzanie zatrzymane i kolejka wyczyszczona.",
+  "QUEUE_EMPTY": "Kolejka jest pusta.",
+  "VOLUME_SET": "Głośność ustawiona na {level}.",
+  "CURRENT_VOLUME": "Aktualna głośność to {volume}.",
+  "NOW_PLAYING": "Aktualnie odtwarzany utwór: {title}"
+}

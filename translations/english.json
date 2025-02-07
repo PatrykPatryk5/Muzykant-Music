@@ -1,0 +1,14 @@
+{
+  "PLAY_SUCCESS": "Enqueued: **{title}**",
+  "NO_RESULTS": "No results found.",
+  "NOT_IN_VOICE": "You must be in a voice channel to play music.",
+  "NO_PLAYER": "No active player found.",
+  "SKIP_SUCCESS": "Skipped the current track.",
+  "PAUSE_SUCCESS": "Paused the track.",
+  "RESUME_SUCCESS": "Resumed the track.",
+  "STOP_SUCCESS": "Stopped playback and cleared the queue.",
+  "QUEUE_EMPTY": "The queue is empty.",
+  "VOLUME_SET": "Volume set to {level}.",
+  "CURRENT_VOLUME": "Current volume is {volume}.",
+  "NOW_PLAYING": "Now playing: {title}"
+}
