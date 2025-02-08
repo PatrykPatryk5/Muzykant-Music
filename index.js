@@ -140,6 +140,14 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
+// Ping response
+client.on('messageCreate', message => {
+  const botMention = `<@${client.user.id}>`;
+  if (message.content.trim() === botMention && !message.author.bot) {
+    message.reply('Siema. Mój prefix to /. Zobacz komendy pod /help');
+  }
+});
+
 // Logowanie klienta
 client.login(process.env.BOT_TOKEN).then(() => {
   logger.info('Klient zalogowany.');
