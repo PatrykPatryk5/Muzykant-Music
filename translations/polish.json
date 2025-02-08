@@ -123,6 +123,12 @@
     "enabled": "włączony",
     "disabled": "wyłączony"
   },
+  "logs": {
+    "autoplayTriggered": "Autoodtwarzanie zostało uruchomione",
+    "autoplayNotDisabled": "Autoodtwarzanie nie jest wyłączone",
+    "autoplayDisabled": "Autoodtwarzanie zostało wyłączone",
+    "noLastTrack": "Brak ostatniego utworu"
+  },
   "commands": {
     "8d": {
       "description": "Włącz/wyłącz efekt 8D",
@@ -209,12 +215,6 @@
       "frameStats": "Statystyki ramek",
       "error": "Błąd",
       "genericError": "Wystąpił błąd podczas przetwarzania żądania."
-    },
-    "logs": {
-      "autoplayTriggered": "Autoodtwarzanie zostało uruchomione",
-      "autoplayNotDisabled": "Autoodtwarzanie nie jest wyłączone",
-      "autoplayDisabled": "Autoodtwarzanie zostało wyłączone",
-      "noLastTrack": "Brak ostatniego utworu"
     },
     "ping": {
       "description": "Uzyskaj opóźnienie bota",

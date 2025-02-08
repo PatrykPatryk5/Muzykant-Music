@@ -127,6 +127,12 @@
     "enabled": "enabled",
     "disabled": "disabled"
   },
+  "logs": {
+    "autoplayTriggered": "Autoplay triggered",
+    "autoplayNotDisabled": "Autoplay is not disabled",
+    "autoplayDisabled": "Autoplay has been disabled",
+    "noLastTrack": "No last track"
+  },
   "commands": {
     "8d": {
       "description": "Enable/disable 8D audio effect",
@@ -213,12 +219,6 @@
       "frameStats": "Frame Stats",
       "error": "Error",
       "genericError": "An error occurred while processing the request."
-    },
-    "logs": {
-        "autoplayTriggered": "Autoplay triggered",
-        "autoplayNotDisabled": "Autoplay is not disabled",
-        "autoplayDisabled": "Autoplay has been disabled",
-        "noLastTrack": "No last track"
     },
     "ping": {
       "description": "Get the bot's latency",
