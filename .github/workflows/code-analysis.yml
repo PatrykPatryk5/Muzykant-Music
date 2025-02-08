@@ -18,13 +18,15 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up CodeQL
-        uses: github/codeql-action/setup-codeql@latest  # Zmieniono na najnowszą wersję
+        uses: github/codeql-action/setup-codeql@v2  # Używamy wersji v2
 
       - name: Initialize CodeQL database
         run: codeql database init --language=javascript  # Zmieniaj w zależności od języka
 
       - name: Perform CodeQL analysis
-        run: codeql analyze --threads 2
+        run: |
+          codeql bundle install codeql-bundle-v2.20.4  # Używamy wersji v2.20.4
+          codeql analyze --threads 2
 
       - name: Upload CodeQL results
-        uses: github/codeql-action/upload-results@latest
+        uses: github/codeql-action/upload-results@v2  # Używamy wersji v2
