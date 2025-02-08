@@ -28,11 +28,8 @@ module.exports = {
             const currentPosition = player.position;
             const trackDuration = current.info.length;
 
-            // Calculate progress percentage
-            const progressPercentage = (currentPosition / trackDuration) * 100;
-
             // Generate progress bar
-            const progressBar = generateProgressBar(progressPercentage);
+            const progressBar = progressBar(currentPosition, trackDuration);
 
             // Format time
             const currentTime = formatTime(currentPosition);
@@ -54,12 +51,27 @@ module.exports = {
     },
 };
 
-function generateProgressBar(percentage) {
-    const totalBars = 20;
-    const filledBars = Math.round((percentage / 100) * totalBars);
-    const emptyBars = totalBars - filledBars;
-    const progressBar = '▬'.repeat(filledBars) + '🔘' + '▬'.repeat(emptyBars);
-    return progressBar;
+function parseTime(string) {
+    const time = string.match(/(\d+[dhms])/g);
+    if (!time) return 0;
+    let ms = 0;
+    for (const t of time) {
+        const unit = t[t.length - 1];
+        const amount = Number(t.slice(0, -1));
+        if (unit === 'd') ms += amount * 24 * 60 * 60 * 1000;
+        else if (unit === 'h') ms += amount * 60 * 60 * 1000;
+        else if (unit === 'm') ms += amount * 60 * 1000;
+        else if (unit === 's') ms += amount * 1000;
+    }
+    return ms;
+}
+
+function progressBar(current, total, size = 20) {
+    const percent = Math.round((current / total) * 100);
+    const filledSize = Math.round((size * current) / total);
+    const filledBar = '▓'.repeat(filledSize);
+    const emptyBar = '░'.repeat(size - filledSize);
+    return `${filledBar}${emptyBar} ${percent}%`;
 }
 
 function formatTime(ms) {
