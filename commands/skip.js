@@ -8,7 +8,7 @@ const translations = {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('skip')
-        .setDescription('Skip the current track'),
+        .setDescription('Pomiń aktualny utwór / Skip the current track'),
     async execute(interaction) {
         const userLang = db.prepare('SELECT language FROM user_preferences WHERE user_id = ?').get(interaction.user.id)?.language || 'pl';
         const t = translations[userLang];
@@ -42,8 +42,8 @@ module.exports = {
             if (player.queue.size === 0) {
                 const embed = new EmbedBuilder()
                     .setColor('#FF0000')
-                    .setTitle(t.errors.noTrackPlaying)
-                    .setDescription(t.errors.notPlaying);
+                    .setTitle(t.errors.noNextTrack)
+                    .setDescription(t.errors.noNextTrackDescription);
                 return interaction.reply({ embeds: [embed], ephemeral: true });
             }
 
