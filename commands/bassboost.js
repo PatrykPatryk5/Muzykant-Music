@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EQList } = require("lavalink-client");
 const db = require('../database');
 const translations = {
     pl: require('../translations/polish.json'),
