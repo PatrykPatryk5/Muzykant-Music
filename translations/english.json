@@ -34,6 +34,7 @@
     "languageSet": "Language set to"
   },
   "errors": {
+    "speedCommandError": "Speed command error",
     "8dCommandError": "8D command error",
     "voiceChannelRequired": "Voice channel required",
     "joinVoiceChannel": "You must be in a voice channel to play music.",
@@ -76,6 +77,8 @@
     "filtersCommandError": "Error in filters command"
   },
   "success": {
+    "speedSet": "Speed set",
+    "speedValue": "Speed set to",
     "8dEnabled": "8D effect has been enabled",
     "8dDisabled": "8D effect has been disabled",
     "trackAdded": "Track added",
