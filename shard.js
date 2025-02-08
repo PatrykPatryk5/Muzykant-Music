@@ -27,7 +27,7 @@ const manager = new ShardingManager(path.join(__dirname, 'index.js'), {
 manager.on('shardCreate', shard => {
     logger.info(`Wystartowano shard o ID: ${shard.id}`);
     shard.on('death', process => {
-        logger.error(`Shard ${shard.id} zakończył się z kodem wyjścia ${process.exitCode}`);
+        logger.error(`Shard ${shard.id} zakończył się z kodem wyjścia ${process.exitCode}`, process);
     });
 
     shard.on('disconnect', () => {
@@ -43,11 +43,27 @@ manager.on('shardCreate', shard => {
     });
 
     shard.on('error', error => {
-        logger.error(`Shard ${shard.id} napotkał błąd: ${error.message}`);
+        logger.error(`Shard ${shard.id} napotkał błąd: ${error.message}`, error);
+    });
+
+    shard.on('spawn', () => {
+        logger.info(`Shard ${shard.id} został uruchomiony`);
+    });
+
+    shard.on('message', message => {
+        logger.info(`Shard ${shard.id} otrzymał wiadomość: ${message}`);
+    });
+
+    shard.on('exit', code => {
+        logger.warn(`Shard ${shard.id} zakończył się z kodem: ${code}`);
+    });
+
+    shard.on('close', code => {
+        logger.warn(`Shard ${shard.id} zamknął się z kodem: ${code}`);
     });
 });
 
 manager.spawn().catch(error => {
-    logger.error(`Błąd podczas uruchamiania shardów: ${error.message}`);
+    logger.error(`Błąd podczas uruchamiania shardów: ${error.message}`, error);
     process.exit(1);
 });
