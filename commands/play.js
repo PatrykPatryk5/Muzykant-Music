@@ -197,46 +197,62 @@ module.exports = {
                 }, 5000);
             }
 
-            // Add button interaction listeners
-            const collector = interaction.channel.createMessageComponentCollector();
-            collector.on('collect', async i => {
+const collector = interaction.channel.createMessageComponentCollector();
+collector.on('collect', async i => {
+    try {
+        switch (i.customId) {
+            case 'previous':
                 try {
-                    switch (i.customId) {
-                        case 'previous':
-                            if (player.queue.previous) {
-                                await player.queue.previous();
-                            }
-                            break;
-                        case 'pause_resume':
-                            try {
-                                if (player.paused) {
-                                    await player.pause(false);
-                                } else {
-                                    await player.pause(true);
-                                }
-                            } catch (error) {
-                                console.error('Error toggling pause state:', error);
-                            }
-                            break;
-                        case 'stop':
-                            await player.stop();
-                            if (interaction.message) {
-                                await interaction.message.delete();
-                            }
-                            break;
-                        case 'next':
-                            if (player.queue.next) {
-                                await player.queue.next();
-                            }
-                            break;
+                    const previous = await player.queue.shiftPrevious();
+                    if (previous) {
+                        await player.play({ clientTrack: previous });
                     }
-                    await i.deferUpdate();
-                    await updateControlPanel(interaction, player);
                 } catch (error) {
-                    console.error('Error handling button interaction:', error);
-                    await i.deferUpdate();
+                    console.error('Error playing previous track:', error);
                 }
-            });
+                break;
+            case 'pause_resume':
+                try {
+                    if (player.playing && !player.paused) {
+                        await player.pause();
+                    } else if (player.paused) {
+                        await player.resume();
+                    }
+                } catch (error) {
+                    console.error('Error toggling pause state:', error);
+                }
+                break;
+            case 'stop':
+                try {
+                    player.queue.clear();
+                    player.skip();
+                    player.disconnect();
+                } catch (error) {
+                    console.error('Error stopping playback:', error);
+                }
+                if (interaction.message) {
+                    await interaction.message.delete();
+                }
+                break;
+            case 'next':
+                try {
+                    if (player.queue.size > 0) {
+                        player.skip();
+                    }
+                } catch (error) {
+                    console.error('Error skipping track:', error);
+                }
+                break;
+        }
+        await i.deferUpdate();
+        if (player.playing) {
+            await updateControlPanel(interaction, player);
+        }
+    } catch (error) {
+        console.error('Error handling button interaction:', error);
+        await i.deferUpdate();
+    }
+});
 
         } catch (error) {
             console.error('Error in play command:', error);
