@@ -70,7 +70,8 @@
         "playbackError": "Błąd odtwarzania",
         "playbackErrorDesc": "Wystąpił błąd podczas próby odtworzenia utworu",
         "genericError": "Wystąpił błąd",
-        "genericErrorDesc": "Wystąpił nieoczekiwany błąd podczas przetwarzania twojego żądania"
+        "genericErrorDesc": "Wystąpił nieoczekiwany błąd podczas przetwarzania twojego żądania",
+        "filtersCommandError": "Błąd komendy filters"
     },
     "success": {
         "trackAdded": "Utwór dodany",
@@ -90,21 +91,44 @@
         "trackAdded": "Dodano utwór",
         "bassboostSet": "Bassboost ustawiony",
         "bassboostLevel": "Bassboost ustawiony na {level}",
-        "addedToQueue": "Dodano do kolejki"
+        "addedToQueue": "Dodano do kolejki",
+        "filtersCleared": "Filtry zostały wyczyszczone",
+        "lowpassEnabled": "Filtr LowPass został włączony",
+        "lowpassDisabled": "Filtr LowPass został wyłączony",
+        "nightcoreEnabled": "Filtr Nightcore został włączony",
+        "nightcoreDisabled": "Filtr Nightcore został wyłączony",
+        "vaporwaveEnabled": "Filtr Vaporwave został włączony",
+        "vaporwaveDisabled": "Filtr Vaporwave został wyłączony",
+        "karaokeEnabled": "Filtr Karaoke został włączony",
+        "karaokeDisabled": "Filtr Karaoke został wyłączony",
+        "rotationEnabled": "Filtr Rotation został włączony",
+        "rotationDisabled": "Filtr Rotation został wyłączony",
+        "tremoloEnabled": "Filtr Tremolo został włączony",
+        "tremoloDisabled": "Filtr Tremolo został wyłączony",
+        "vibratoEnabled": "Filtr Vibrato został włączony",
+        "vibratoDisabled": "Filtr Vibrato został wyłączony",
+        "echoEnabled": "Filtr Echo został włączony",
+        "echoDisabled": "Filtr Echo został wyłączony",
+        "reverbEnabled": "Filtr Reverb został włączony",
+        "reverbDisabled": "Filtr Reverb został wyłączony",
+        "highPassEnabled": "Filtr HighPass został włączony",
+        "highPassDisabled": "Filtr HighPass został wyłączony",
+        "normalizationEnabled": "Filtr Normalization został włączony",
+        "normalizationDisabled": "Filtr Normalization został wyłączony",
+        "filterToggle": "Przełącznik filtra"
     },
     "commands": {
         "8d": {
             "description": "Włącz/wyłącz efekt 8D",
             "enabledMessage": "Efekt 8D został {status}"
         },
-"bassboost": {
-    "description": "Włącz/wyłącz efekt wzmocnienia basów",
-    "enabledMessage": "Efekt wzmocnienia basów został {status}",
-    "invalidValueTitle": "Nieprawidłowa wartość basów",
-    "invalidValueDescription": "Wartość basów musi być pomiędzy 0.5 a 2.0.",
-    "successMessage": "Wzmocnienie basów ustawione na {value}"
-},
-
+        "bassboost": {
+            "description": "Włącz/wyłącz efekt wzmocnienia basów",
+            "enabledMessage": "Efekt wzmocnienia basów został {status}",
+            "invalidValueTitle": "Nieprawidłowa wartość basów",
+            "invalidValueDescription": "Wartość basów musi być pomiędzy 0.5 a 2.0.",
+            "successMessage": "Wzmocnienie basów ustawione na {value}"
+        },
         "distorsion": {
             "description": "Włącz/wyłącz efekt zniekształcenia",
             "enabledMessage": "Efekt zniekształcenia został {status}"
