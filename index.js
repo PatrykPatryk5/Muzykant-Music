@@ -77,15 +77,19 @@ process.on('uncaughtException', error => {
 });
 
 // Reconnect logic for Lavalink nodes
-const reconnectNode = (node) => {
+const reconnectNode = async (node) => {
   logger.warn(`Attempting to reconnect node ${node.id} in 5 seconds...`);
-  setTimeout(() => {
-    node.connect().catch(e => logger.error(`Failed to reconnect node ${node.id}: ${e.message}`, e));
+  setTimeout(async () => {
+    try {
+      await node.connect();
+    } catch (e) {
+      logger.error(`Failed to reconnect node ${node.id}: ${e.message}`, e);
+    }
   }, 5000);
 };
 
 // Inicjalizacja menedżera po gotowości klienta
-client.once('ready', () => {
+client.once('ready', async () => {
   logger.info(`Zalogowano jako ${client.user.tag}`);
   client.lavalink = new LavalinkManager({
     nodes,
@@ -97,30 +101,31 @@ client.once('ready', () => {
     },
   });
 
-  client.lavalink.init(client.user)
-    .then(() => {
-      logger.info('Lavalink manager zainicjalizowany.');
+  try {
+    await client.lavalink.init(client.user);
+    logger.info('Lavalink manager zainicjalizowany.');
 
-      // Przekazywanie surowych eventów do menedżera
-      client.on('raw', data => client.lavalink.sendRawData(data));
+    // Przekazywanie surowych eventów do menedżera
+    client.on('raw', data => client.lavalink.sendRawData(data));
 
-      // Obsługa zdarzeń node'ów
-      client.lavalink.on('nodeError', (node, error) => {
-        logger.error(`Błąd węzła ${node.id}: ${error.message}`, error);
-        reconnectNode(node);
-      });
+    // Obsługa zdarzeń node'ów
+    client.lavalink.on('nodeError', (node, error) => {
+      logger.error(`Błąd węzła ${node.id}: ${error.message}`, error);
+      reconnectNode(node);
+    });
 
-      client.lavalink.on('nodeDisconnect', (node, reason) => {
-        logger.warn(`Węzeł ${node.id} rozłączony. Powód: ${reason}`);
-        reconnectNode(node);
-      });
+    client.lavalink.on('nodeDisconnect', (node, reason) => {
+      logger.warn(`Węzeł ${node.id} rozłączony. Powód: ${reason}`);
+      reconnectNode(node);
+    });
 
-      client.lavalink.on('nodeConnected', (node) => {
-        logger.info(`Węzeł ${node.id} połączony.`);
-      });
+    client.lavalink.on('nodeConnected', (node) => {
+      logger.info(`Węzeł ${node.id} połączony.`);
+    });
 
-    })
-    .catch(error => logger.error(`Błąd inicjalizacji Lavalink managera: ${error.message}`, error));
+  } catch (error) {
+    logger.error(`Błąd inicjalizacji Lavalink managera: ${error.message}`, error);
+  }
 });
 
 // Obsługa interakcji – komendy slash
@@ -141,10 +146,10 @@ client.on('interactionCreate', async interaction => {
 });
 
 // Ping response
-client.on('messageCreate', message => {
+client.on('messageCreate', async message => {
   const botMention = `<@${client.user.id}>`;
   if (message.content.trim() === botMention && !message.author.bot) {
-    message.reply('Siema. Mój prefix to /. Zobacz komendy pod /help');
+    await message.reply('Siema. Mój prefix to /. Zobacz komendy pod /help');
   }
 });
 
