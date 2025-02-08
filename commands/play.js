@@ -60,6 +60,14 @@ async function sendControlPanel(interaction, player) {
 
     const row = await createControlRow(player);
 
+    if (interaction.message) {
+        try {
+            await interaction.message.delete();
+        } catch (error) {
+            console.error('Error deleting existing control panel message:', error);
+        }
+    }
+
     const message = await interaction.channel.send({ embeds: [embed], components: [row] });
     interaction.message = message;
 
@@ -165,8 +173,15 @@ module.exports = {
                     .setTitle(t.success.playlistAdded)
                     .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
 
-                await interaction.editReply({ embeds: [embed] });
-                await sendControlPanel(interaction, player);
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    try {
+                        await sendControlPanel(interaction, player);
+                        await message.delete();
+                    } catch (error) {
+                        console.error('Error handling playlist message:', error);
+                    }
+                }, 5000);
             } else {
                 const track = res.tracks[0];
                 player.queue.add(track);
@@ -180,8 +195,15 @@ module.exports = {
                     .setTitle(t.success.trackAdded)
                     .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
 
-                await interaction.editReply({ embeds: [embed] });
-                await sendControlPanel(interaction, player);
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    try {
+                        await sendControlPanel(interaction, player);
+                        await message.delete();
+                    } catch (error) {
+                        console.error('Error handling track message:', error);
+                    }
+                }, 5000);
             }
 
             // Add button interaction listeners
