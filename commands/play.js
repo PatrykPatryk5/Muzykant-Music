@@ -1,9 +1,109 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const db = require('../database');
 const translations = {
     pl: require('../translations/polish.json'),
     en: require('../translations/english.json')
 };
+
+function parseDuration(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function progressBar(current, total, size = 20) {
+    const percent = Math.round((current / total) * 100);
+    const filledSize = Math.round((size * current) / total);
+    const filledBar = '▓'.repeat(filledSize);
+    const emptyBar = '░'.repeat(size - filledSize);
+    return `${filledBar}${emptyBar} ${percent}%`;
+}
+
+async function createControlRow(player) {
+    return new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('previous')
+                .setEmoji('⏮️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('pause_resume')
+                .setEmoji(player.paused ? '▶️' : '⏸️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('stop')
+                .setEmoji('⏹️')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId('next')
+                .setEmoji('⏭️')
+                .setStyle(ButtonStyle.Primary)
+        );
+}
+
+async function sendControlPanel(interaction, player) {
+    if (!player.queue.current) return;
+
+    const track = player.queue.current;
+    const position = player.position;
+    const duration = track.info.length || track.info.duration || 0;
+
+    const progressBarText = progressBar(position, duration);
+    const currentTime = parseDuration(position);
+    const totalTime = parseDuration(duration);
+
+    const embed = new EmbedBuilder()
+        .setColor('#00FF00')
+        .setTitle('Odtwarzanie')
+        .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
+
+    const row = await createControlRow(player);
+
+    if (interaction.message) {
+        try {
+            await interaction.message.delete();
+        } catch (error) {
+            console.error('Error deleting existing control panel message:', error);
+        }
+    }
+
+    const message = await interaction.channel.send({ embeds: [embed], components: [row] });
+    interaction.message = message;
+
+    if (player.playing) {
+        setTimeout(() => updateControlPanel(interaction, player), 5000);
+    }
+}
+
+async function updateControlPanel(interaction, player) {
+    if (!player.queue.current || !interaction.message) return;
+
+    const track = player.queue.current;
+    const position = player.position;
+    const duration = track.info.length || track.info.duration || 0;
+
+    const progressBarText = progressBar(position, duration);
+    const currentTime = parseDuration(position);
+    const totalTime = parseDuration(duration);
+
+    const embed = new EmbedBuilder()
+        .setColor('#00FF00')
+        .setTitle('Odtwarzanie')
+        .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
+
+    const row = await createControlRow(player);
+
+    try {
+        await interaction.message.edit({ embeds: [embed], components: [row] });
+        
+        if (player.playing) {
+            setTimeout(() => updateControlPanel(interaction, player), 5000);
+        }
+    } catch (error) {
+        console.error('Error updating control panel:', error);
+    }
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -49,171 +149,116 @@ module.exports = {
                 await player.connect();
             }
 
-            // Sprawdzanie czy to link do Spotify
-            if (query.includes('open.spotify.com')) {
-                const spotifyUrl = new URL(query);
-                const pathParts = spotifyUrl.pathname.split('/');
-                const type = pathParts[1]; // playlist, track, album
-                const id = pathParts[2].split('?')[0];
+            const res = await player.search(query, interaction.user);
 
-                let loadingEmbed = new EmbedBuilder()
-                    .setColor('#FFFF00')
-                    .setTitle('Ładowanie...')
-                    .setDescription('Wczytywanie utworów ze Spotify...');
-                await interaction.editReply({ embeds: [loadingEmbed] });
+            if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
+                const embed = new EmbedBuilder()
+                    .setColor('#FF0000')
+                    .setTitle(t.errors.noMatches)
+                    .setDescription(t.errors.noResultsFound);
+                return interaction.editReply({ embeds: [embed] });
+            }
 
-                let searchQuery = `sp:${type}:${id}`;
-                console.log('Spotify search query:', searchQuery);
-
-                let searchResult = await player.search(searchQuery, interaction.user);
-                
-                if (!searchResult || !searchResult.tracks || searchResult.tracks.length === 0) {
-                    searchQuery = `spsearch:${query}`;
-                    console.log('Trying alternative search:', searchQuery);
-                    searchResult = await player.search(searchQuery, interaction.user);
-                    
-                    if (!searchResult || !searchResult.tracks || searchResult.tracks.length === 0) {
-                        const errorEmbed = new EmbedBuilder()
-                            .setColor('#FF0000')
-                            .setTitle(t.errors.noMatches)
-                            .setDescription(t.errors.noResultsFound);
-                        return interaction.editReply({ embeds: [errorEmbed] });
-                    }
+            if (res.loadType === 'PLAYLIST_LOADED') {
+                for (const track of res.tracks) {
+                    player.queue.add(track);
                 }
 
-                console.log('Found tracks:', searchResult.tracks.length);
-                console.log('Player state before adding tracks:', {
-                    playing: player.playing,
-                    paused: player.paused,
-                    queueSize: player.queue.size
-                });
-
-                // Dodaj wszystkie utwory do kolejki
-                for (const track of searchResult.tracks) {
-                    await player.queue.add(track);
-                }
-
-                console.log('Player state after adding tracks:', {
-                    playing: player.playing,
-                    paused: player.paused,
-                    queueSize: player.queue.size
-                });
-
-                // Upewnij się, że odtwarzanie rozpocznie się
                 if (!player.playing) {
-                    try {
-                        await player.play();
-                        console.log('Started playback');
-                    } catch (playError) {
-                        console.error('Error starting playback:', playError);
-                        // Spróbuj ponownie rozpocząć odtwarzanie po krótkim opóźnieniu
-                        setTimeout(async () => {
-                            try {
-                                if (!player.playing && player.queue.size > 0) {
-                                    await player.play();
-                                    console.log('Started playback after delay');
-                                }
-                            } catch (retryError) {
-                                console.error('Error on retry:', retryError);
-                            }
-                        }, 1000);
-                    }
+                    await player.play();
                 }
 
-                const successEmbed = new EmbedBuilder()
+                const embed = new EmbedBuilder()
                     .setColor('#00FF00')
                     .setTitle(t.success.playlistAdded)
-                    .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', searchResult.tracks.length)}: **${searchResult.playlistInfo?.name || 'Spotify Track'}**`);
+                    .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
 
-                return interaction.editReply({ embeds: [successEmbed] });
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    try {
+                        await message.delete();
+                        await sendControlPanel(interaction, player);
+                    } catch (error) {
+                        console.error('Error handling playlist message:', error);
+                    }
+                }, 5000);
             } else {
-                // Standardowe wyszukiwanie dla nie-Spotify linków
-                let searchQuery = query;
-                if (query.includes('youtube.com') || query.includes('youtu.be')) {
-                    searchQuery = `ytsearch:${query}`;
+                const track = res.tracks[0];
+                player.queue.add(track);
+
+                if (!player.playing) {
+                    await player.play();
                 }
 
-                const res = await player.search(searchQuery, interaction.user);
+                const embed = new EmbedBuilder()
+                    .setColor('#00FF00')
+                    .setTitle(t.success.trackAdded)
+                    .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
 
-                if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
-                    const embed = new EmbedBuilder()
-                        .setColor('#FF0000')
-                        .setTitle(t.errors.noMatches)
-                        .setDescription(t.errors.noResultsFound);
-                    return interaction.editReply({ embeds: [embed] });
-                }
-
-                if (res.loadType === 'PLAYLIST_LOADED') {
-                    for (const track of res.tracks) {
-                        await player.queue.add(track);
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    try {
+                        await message.delete();
+                        await sendControlPanel(interaction, player);
+                    } catch (error) {
+                        console.error('Error handling track message:', error);
                     }
-                    
-                    console.log('Player state before playing playlist:', {
-                        playing: player.playing,
-                        paused: player.paused,
-                        queueSize: player.queue.size
-                    });
-
-                    if (!player.playing) {
-                        try {
-                            await player.play();
-                            console.log('Started playlist playback');
-                        } catch (playError) {
-                            console.error('Error starting playlist playback:', playError);
-                            setTimeout(async () => {
-                                if (!player.playing && player.queue.size > 0) {
-                                    await player.play();
-                                }
-                            }, 1000);
-                        }
-                    }
-
-                    const embed = new EmbedBuilder()
-                        .setColor('#00FF00')
-                        .setTitle(t.success.playlistAdded)
-                        .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
-                    
-                    return interaction.editReply({ embeds: [embed] });
-                } else {
-                    const track = res.tracks[0];
-                    if (!track) {
-                        const errorEmbed = new EmbedBuilder()
-                            .setColor('#FF0000')
-                            .setTitle(t.errors.playCommandError)
-                            .setDescription(t.errors.genericError);
-                        return interaction.editReply({ embeds: [errorEmbed] });
-                    }
-                    
-                    await player.queue.add(track);
-                    
-                    console.log('Player state before playing single track:', {
-                        playing: player.playing,
-                        paused: player.paused,
-                        queueSize: player.queue.size
-                    });
-
-                    if (!player.playing) {
-                        try {
-                            await player.play();
-                            console.log('Started single track playback');
-                        } catch (playError) {
-                            console.error('Error starting single track playback:', playError);
-                            setTimeout(async () => {
-                                if (!player.playing && player.queue.size > 0) {
-                                    await player.play();
-                                }
-                            }, 1000);
-                        }
-                    }
-
-                    const embed = new EmbedBuilder()
-                        .setColor('#00FF00')
-                        .setTitle(t.success.trackAdded)
-                        .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
-                    
-                    return interaction.editReply({ embeds: [embed] });
-                }
+                }, 5000);
             }
+
+            // Add button interaction listeners
+            const collector = interaction.channel.createMessageComponentCollector();
+            collector.on('collect', async i => {
+                try {
+                    switch (i.customId) {
+                        case 'previous':
+                            try {
+                                const previous = await player.queue.previous();
+                                if (!previous) return console.error("No previous track found");
+                                await player.play({ clientTrack: previous });
+                            } catch (error) {
+                                console.error('Error playing previous track:', error);
+                            }
+                            break;
+                        case 'pause_resume':
+                            try {
+                                if (player.playing && !player.paused) {
+                                    await player.pause();
+                                } else if (player.paused) {
+                                    await player.resume();
+                                }
+                            } catch (error) {
+                                console.error('Error toggling pause state:', error);
+                            }
+                            break;
+                        case 'stop':
+                            try {
+                                await player.stopPlaying(true, false);
+                            } catch (error) {
+                                console.error('Error stopping playback:', error);
+                            }
+                            if (interaction.message) {
+                                await interaction.message.delete();
+                            }
+                            break;
+                        case 'next':
+                            try {
+                                player.skip();
+                            } catch (error) {
+                                console.error('Error skipping track:', error);
+                            }
+                            break;
+                    }
+                    await i.deferUpdate();
+                    if (player.playing) {
+                        await updateControlPanel(interaction, player);
+                    }
+                } catch (error) {
+                    console.error('Error handling button interaction:', error);
+                    await i.deferUpdate();
+                }
+            });
+
         } catch (error) {
             console.error('Error in play command:', error);
             const embed = new EmbedBuilder()

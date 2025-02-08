@@ -5,6 +5,21 @@ const translations = {
     en: require('../translations/english.json')
 };
 
+function parseDuration(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function progressBar(current, total, size = 20) {
+    const percent = Math.round((current / total) * 100);
+    const filledSize = Math.round((size * current) / total);
+    const filledBar = '▓'.repeat(filledSize);
+    const emptyBar = '░'.repeat(size - filledSize);
+    return `${filledBar}${emptyBar} ${percent}%`;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('nowplaying')
@@ -24,11 +39,21 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
         try {
-            const current = player.queue.current;
+            const track = player.queue.current;
+            const position = player.position;
+            const duration = track.info.length || track.info.duration || 0;
+
+            // Generate progress bar
+            const progressBarText = progressBar(position, duration);
+
+            // Format time
+            const currentTime = parseDuration(position);
+            const totalTime = parseDuration(duration);
+
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle(t.nowPlayingCommand.nowPlaying)
-                .setDescription(`**${current.info.title}**`);
+                .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
             return interaction.editReply({ embeds: [embed] });
         } catch (error) {
             console.error('Error in nowplaying command:', error);
