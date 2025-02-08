@@ -176,8 +176,9 @@ module.exports = {
                 const message = await interaction.editReply({ embeds: [embed] });
                 setTimeout(async () => {
                     try {
-                        await sendControlPanel(interaction, player);
                         await message.delete();
+                        await sendControlPanel(interaction, player);
+                        //await message.delete();
                     } catch (error) {
                         console.error('Error handling playlist message:', error);
                     }
@@ -198,8 +199,9 @@ module.exports = {
                 const message = await interaction.editReply({ embeds: [embed] });
                 setTimeout(async () => {
                     try {
-                        await sendControlPanel(interaction, player);
                         await message.delete();
+                        await sendControlPanel(interaction, player);
+                        //await message.delete();
                     } catch (error) {
                         console.error('Error handling track message:', error);
                     }
