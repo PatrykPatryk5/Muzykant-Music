@@ -16,6 +16,7 @@ module.exports = {
         await interaction.deferReply();
         const lavalink = interaction.client.lavalink;
         const player = lavalink.getPlayer(interaction.guild.id);
+        
         if (!player) {
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
@@ -25,9 +26,10 @@ module.exports = {
         }
 
         try {
-            player.queue.clear();
-            await player.stop();
+            // Use the correct stopPlaying method with clearQueue=true and executeAutoplay=false
+            await player.stopPlaying(true, false);
             await player.disconnect();
+
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle(t.success.playbackStopped)
