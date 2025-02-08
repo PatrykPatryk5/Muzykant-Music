@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "npm" # Possible values include: bundler, cargo, composer, docker, elm, git-submodule, github-actions, go-mod, gradle, maven, npm, nuget, pip, terraform, etc.
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
