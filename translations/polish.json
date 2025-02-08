@@ -34,7 +34,8 @@
     "languageSet": "Ustawiono język na"
   },
   "errors": {
-    "rateCommandError": "Błąd komendy prędkości",
+    "pitchCommandError": "Błąd komendy wysokości dzwięku",
+    "rateCommandError": "Błąd komendy tempa",
     "speedCommandError": "Błąd komendy prędkości",
     "8dCommandError": "Błąd komendy 8d",
     "voiceChannelRequired": "Wymagany kanał głosowy",
@@ -77,8 +78,10 @@
     "filtersCommandError": "Błąd komendy filters"
   },
   "success": {
-    "rateValue": "Prędkość ustawiona na",
-    "rateSet": "Prędkość ustawiona",
+    "pitchValue": "Wysokość dźwięku ustawiona na",
+    "pitchSet": "Wysokość dźwięku ustawiona",
+    "rateValue": "Tempo ustawiona na",
+    "rateSet": "Tempo ustawiona",
     "speedSet": "Prędkość ustawiona",
     "speedValue": "Prędkość ustawiona na",
     "8dEnabled": "Efekt 8D został włączony",
