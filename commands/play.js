@@ -129,6 +129,17 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
+        // Check if there is already an active control panel in the server
+        if (interaction.guild.activeControlPanel) {
+            const embed = new EmbedBuilder()
+                .setColor('#FF0000')
+                .setTitle(t.errors.controlPanelActive)
+                .setDescription(t.errors.onlyOneControlPanel);
+            return interaction.editReply({ embeds: [embed] });
+        }
+
+        interaction.guild.activeControlPanel = true;
+
         try {
             const player = lavalink.createPlayer({
                 guildId: interaction.guild.id,
@@ -147,6 +158,7 @@ module.exports = {
                     .setColor('#FF0000')
                     .setTitle(t.errors.noMatches)
                     .setDescription(t.errors.noResultsFound);
+                interaction.guild.activeControlPanel = false;
                 return interaction.editReply({ embeds: [embed] });
             }
 
@@ -197,7 +209,6 @@ module.exports = {
                 }, 5000);
             }
 
-// Add button interaction listeners
 const collector = interaction.channel.createMessageComponentCollector();
 collector.on('collect', async i => {
     try {
@@ -234,6 +245,7 @@ collector.on('collect', async i => {
                 if (interaction.message) {
                     await interaction.message.delete();
                 }
+                interaction.guild.activeControlPanel = false;
                 break;
             case 'next':
                 try {
@@ -261,6 +273,7 @@ collector.on('collect', async i => {
                 .setColor('#FF0000')
                 .setTitle(t.errors.playCommandError)
                 .setDescription(t.errors.genericError);
+            interaction.guild.activeControlPanel = false;
             return interaction.editReply({ embeds: [embed] });
         }
     },
