@@ -75,7 +75,7 @@ module.exports = {
                     { name: t.commands.nodeCommand.uptime || 'Uptime', value: `${Math.floor(node.stats.uptime / 60000)} minutes` },
                     { name: t.commands.nodeCommand.cpuLoad || 'CPU Load', value: `${node.stats.cpu.systemLoad.toFixed(2)}%` },
                     { name: t.commands.nodeCommand.memoryUsage || 'Memory Usage', value: `${(node.stats.memory.used / 1024 / 1024).toFixed(2)} MB` },
-                    { name: t.commands.nodeCommand.frameStats || 'Frame Stats', value: `Sent: ${node.stats.frameStats.sent}, Deficit: ${node.stats.frameStats.deficit}, Nulled: ${node.stats.frameStats.nulled}` }
+                    // { name: t.commands.nodeCommand.frameStats || 'Frame Stats', value: `Sent: ${node.stats.frameStats.sent}, Deficit: ${node.stats.frameStats.deficit}, Nulled: ${node.stats.frameStats.nulled}` }
                 );
             return interaction.editReply({ embeds: [embed] });
         } catch (error) {
