@@ -118,7 +118,10 @@
         "highPassDisabled": "Filtr HighPass został wyłączony",
         "normalizationEnabled": "Filtr Normalization został włączony",
         "normalizationDisabled": "Filtr Normalization został wyłączony",
-        "filterToggle": "Przełącznik filtra"
+        "filterToggle": "Przełącznik filtra",
+        "autoplayStatus": "Status autoodtwarzania: {status}",
+        "enabled": "włączony",
+        "disabled": "wyłączony"
     },
     "commands": {
         "8d": {
