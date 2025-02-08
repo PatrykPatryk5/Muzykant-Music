@@ -30,3 +30,12 @@ jobs:
         echo "BOT_TOKEN is set to: $BOT_TOKEN"  # Debugging line
     - run: npm install
     - run: npm run start
+    - name: Check bot startup logs
+      run: |
+        sleep 5  # Wait a few seconds for the bot to start
+        if grep -q "Zalogowano jako" logs.txt; then
+          echo "Test zakończony sukcesem: Bot zalogował się poprawnie!"
+        else
+          echo "Test niepowodzenia: Bot nie zalogował się poprawnie."
+          exit 1
+        fi
