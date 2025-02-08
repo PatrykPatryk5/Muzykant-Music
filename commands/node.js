@@ -28,7 +28,7 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
-        console.log('Lavalink client:', JSON.stringify(lavalink, null, 2));
+        console.log('Lavalink client options:', lavalink.options);
 
         const nodeManager = lavalink.nodeManager;
         if (!nodeManager) {
@@ -39,6 +39,8 @@ module.exports = {
                 .setDescription(t.nodeCommand.noNodeFound);
             return interaction.editReply({ embeds: [embed] });
         }
+
+        console.log('Node manager nodes:', nodeManager.nodes);
 
         const nodes = nodeManager.nodes;
         if (!nodes || nodes.size === 0) {
