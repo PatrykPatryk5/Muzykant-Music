@@ -41,7 +41,7 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle(t.nowPlayingCommand.nowPlaying)
-                .setDescription(`**${current.info.title}**\n${progressBar}\n${currentTime} - ${totalTime}`);
+                .setDescription(`**${current.info.title}**\n\n${progressBar}\n\n${currentTime} - ${totalTime}`);
             return interaction.editReply({ embeds: [embed] });
         } catch (error) {
             console.error('Error in nowplaying command:', error);
