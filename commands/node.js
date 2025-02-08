@@ -28,10 +28,11 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
-        console.log('Lavalink client:', lavalink);
+        console.log('Lavalink client:', JSON.stringify(lavalink, null, 2));
 
-        if (!lavalink.nodes) {
-            console.error('Lavalink nodes are not defined');
+        const nodeManager = lavalink.nodeManager;
+        if (!nodeManager) {
+            console.error('Node manager is not defined in Lavalink client');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.nodeCommand.nodeError)
@@ -39,9 +40,19 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
-        const node = lavalink.nodes.first();
+        const nodes = nodeManager.nodes;
+        if (!nodes || nodes.size === 0) {
+            console.error('No nodes found in NodeManager');
+            const embed = new EmbedBuilder()
+                .setColor('#FF0000')
+                .setTitle(t.nodeCommand.nodeError)
+                .setDescription(t.nodeCommand.noNodeFound);
+            return interaction.editReply({ embeds: [embed] });
+        }
+
+        const node = nodes.values().next().value;
         if (!node) {
-            console.error('No node found in Lavalink client');
+            console.error('No node found in NodeManager');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.nodeCommand.nodeError)
