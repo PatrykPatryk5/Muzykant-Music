@@ -213,7 +213,7 @@ module.exports = {
                     switch (i.customId) {
                         case 'previous':
                             try {
-                                const previous = player.queue.previous();
+                                const previous = player.queue.shiftPrevious();
                                 if (previous) {
                                     player.queue.unshift(previous);
                                     await player.play(previous);
@@ -235,7 +235,7 @@ module.exports = {
                             break;
                         case 'stop':
                             try {
-                                player.queue.clear();
+                                //player.queue.clear();
                                 player.stop();
                                 player.disconnect();
                             } catch (error) {
