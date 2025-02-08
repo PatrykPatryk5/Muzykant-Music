@@ -178,7 +178,6 @@ module.exports = {
                     try {
                         await message.delete();
                         await sendControlPanel(interaction, player);
-                        //await message.delete();
                     } catch (error) {
                         console.error('Error handling playlist message:', error);
                     }
@@ -201,7 +200,6 @@ module.exports = {
                     try {
                         await message.delete();
                         await sendControlPanel(interaction, player);
-                        //await message.delete();
                     } catch (error) {
                         console.error('Error handling track message:', error);
                     }
@@ -215,9 +213,10 @@ module.exports = {
                     switch (i.customId) {
                         case 'previous':
                             try {
-                                const previous = await player.queue.shiftPrevious();
+                                const previous = player.queue.previous();
                                 if (previous) {
-                                    await player.play({ clientTrack: previous });
+                                    player.queue.unshift(previous);
+                                    await player.play(previous);
                                 }
                             } catch (error) {
                                 console.error('Error playing previous track:', error);
@@ -237,7 +236,7 @@ module.exports = {
                         case 'stop':
                             try {
                                 player.queue.clear();
-                                player.skip();
+                                player.stop();
                                 player.disconnect();
                             } catch (error) {
                                 console.error('Error stopping playback:', error);
@@ -248,9 +247,7 @@ module.exports = {
                             break;
                         case 'next':
                             try {
-                                if (player.queue.size > 0) {
-                                    player.skip();
-                                }
+                                player.skip();
                             } catch (error) {
                                 console.error('Error skipping track:', error);
                             }
