@@ -54,21 +54,21 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
         try {
-            const current = player.queue.current;
-            const currentPosition = player.position;
-            const trackDuration = current.info.length;
+            const track = player.queue.current;
+            const position = player.position;
+            const duration = track.info.length;
 
             // Generate progress bar
-            const progressBarText = progressBar(currentPosition, trackDuration);
+            const progressBarText = progressBar(position, duration);
 
             // Format time
-            const currentTime = formatTime(currentPosition);
-            const totalTime = formatTime(trackDuration);
+            const currentTime = formatTime(position);
+            const totalTime = formatTime(duration);
 
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle(t.nowPlayingCommand.nowPlaying)
-                .setDescription(`**${current.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
+                .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
             return interaction.editReply({ embeds: [embed] });
         } catch (error) {
             console.error('Error in nowplaying command:', error);
