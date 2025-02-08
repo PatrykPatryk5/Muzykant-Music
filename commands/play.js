@@ -233,9 +233,7 @@ module.exports = {
                             break;
                         case 'stop':
                             try {
-                                player.queue.clear();
-                                player.stop();
-                                player.disconnect();
+                                await player.stopPlaying(true, false);
                             } catch (error) {
                                 console.error('Error stopping playback:', error);
                             }
