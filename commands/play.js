@@ -203,36 +203,52 @@ collector.on('collect', async i => {
     try {
         switch (i.customId) {
             case 'previous':
-                if (player.queue.previous) {
-                    await player.queue.previous();
+                try {
+                    const previous = await player.queue.shiftPrevious();
+                    if (previous) {
+                        await player.play({ clientTrack: previous });
+                    }
+                } catch (error) {
+                    console.error('Error playing previous track:', error);
                 }
                 break;
             case 'pause_resume':
                 try {
-                    // Check the current state before attempting to change it
                     if (player.playing && !player.paused) {
-                        await player.pause(true);
+                        await player.pause();
                     } else if (player.paused) {
-                        await player.resume();  // Use resume() instead of pause(false)
+                        await player.resume();
                     }
                 } catch (error) {
                     console.error('Error toggling pause state:', error);
                 }
                 break;
             case 'stop':
-                await player.stop();
+                try {
+                    player.queue.clear();
+                    player.skip();
+                    player.disconnect();
+                } catch (error) {
+                    console.error('Error stopping playback:', error);
+                }
                 if (interaction.message) {
                     await interaction.message.delete();
                 }
                 break;
             case 'next':
-                if (player.queue.next) {
-                    await player.queue.next();
+                try {
+                    if (player.queue.size > 0) {
+                        player.skip();
+                    }
+                } catch (error) {
+                    console.error('Error skipping track:', error);
                 }
                 break;
         }
         await i.deferUpdate();
-        await updateControlPanel(interaction, player);
+        if (player.playing) {
+            await updateControlPanel(interaction, player);
+        }
     } catch (error) {
         console.error('Error handling button interaction:', error);
         await i.deferUpdate();
