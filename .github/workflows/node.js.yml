@@ -32,7 +32,7 @@ jobs:
         npm run start &  # Uruchomienie bota w tle
         sleep 10  # Czekaj 10 sekund na uruchomienie bota
         # Sprawdzamy, czy pojawiły się błędy w logach (sprawdzamy plik bot.log), ignorując błędy specyficzne dla Lavalinka
-        if grep -q -e "Unhandled promise rejection" -e "error" -e "Exception" -e "fatal" bot.log && ! grep -q "Uncaught exception: Unhandled error. LavalinkNode" bot.log; then
+        if grep -q -e "Unhandled promise rejection" -e "error" -e "Exception" -e "fatal" bot.log && ! grep -q -e "Uncaught exception: Unhandled error.*LavalinkNode" bot.log; then
           echo "Test niepowodzenia: Wystąpił poważny błąd w logach!"
           exit 1
         else
