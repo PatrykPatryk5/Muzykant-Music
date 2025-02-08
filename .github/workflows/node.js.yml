@@ -10,10 +10,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Używamy tylko jednej wersji Node.js
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [22.x]  # Możesz zmienić na dowolną wersję Node.js, którą chcesz testować
+        # Jeśli chcesz zmienić wersję, po prostu zmień na np. [20.x]
 
     steps:
     - uses: actions/checkout@v4
