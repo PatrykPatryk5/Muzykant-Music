@@ -34,6 +34,7 @@
     "languageSet": "Language set to"
   },
   "errors": {
+    "rateCommandError": "Rate command error",
     "speedCommandError": "Speed command error",
     "8dCommandError": "8D command error",
     "voiceChannelRequired": "Voice channel required",
@@ -77,6 +78,8 @@
     "filtersCommandError": "Error in filters command"
   },
   "success": {
+    "rateValue": "Rate value",
+    "rateSet": "Rate set",
     "speedSet": "Speed set",
     "speedValue": "Speed set to",
     "8dEnabled": "8D effect has been enabled",
