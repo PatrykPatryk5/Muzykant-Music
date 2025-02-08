@@ -39,7 +39,7 @@ module.exports = {
         if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: t.errors.joinVoiceChannel });
 
         try {
-            if (player.queue.size === 0) {
+            if (player.queue.size <= 1) {
                 const embed = new EmbedBuilder()
                     .setColor('#FF0000')
                     .setTitle(t.errors.noNextTrack)
