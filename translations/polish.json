@@ -187,6 +187,23 @@
             "uptime": "Czas działania",
             "minutes": "minut"
         },
+    "nodeCommand": {
+        "description": "Uzyskaj informacje o nodzie",
+        "nodeError": "Błąd noda",
+        "noNodeFound": "Nie znaleziono noda.",
+        "nodeInformation": "Informacje o nodzie",
+        "status": "Status",
+        "connected": "Połączony",
+        "disconnected": "Rozłączony",
+        "players": "Gracze",
+        "playingPlayers": "Grający gracze",
+        "uptime": "Czas działania",
+        "cpuLoad": "Obciążenie CPU",
+        "memoryUsage": "Zużycie pamięci",
+        "frameStats": "Statystyki ramek",
+        "error": "Błąd",
+        "genericError": "Wystąpił błąd podczas przetwarzania żądania."
+    },
         "ping": {
             "description": "Uzyskaj opóźnienie bota",
             "latency": "Opóźnienie",

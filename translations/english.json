@@ -191,6 +191,23 @@
             "uptime": "Uptime",
             "minutes": "minutes"
         },
+    "nodeCommand": {
+        "description": "Get information about the node",
+        "nodeError": "Node Error",
+        "noNodeFound": "No node found.",
+        "nodeInformation": "Node Information",
+        "status": "Status",
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "players": "Players",
+        "playingPlayers": "Playing players",
+        "uptime": "Uptime",
+        "cpuLoad": "CPU Load",
+        "memoryUsage": "Memory Usage",
+        "frameStats": "Frame Stats",
+        "error": "Error",
+        "genericError": "An error occurred while processing the request."
+    },
         "ping": {
             "description": "Get the bot's latency",
             "latency": "Latency",
