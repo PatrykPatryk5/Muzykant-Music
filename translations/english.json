@@ -92,6 +92,8 @@
         "playlistAdded": "Playlist added",
         "addedPlaylistToQueue": "Added playlist with {count} tracks to the queue",
         "trackAdded": "Track added",
+        "bassboostSet": "Bassboost set",
+        "bassboostLevel": "Bassboost set to {level}",
         "addedToQueue": "Added to the queue"
     },
     "commands": {
@@ -99,10 +101,15 @@
             "description": "Enable/disable 8D audio effect",
             "enabledMessage": "8D audio effect has been {status}"
         },
-        "bassboost": {
-            "description": "Enable/disable bass boost effect",
-            "enabledMessage": "Bass boost effect has been {status}"
-        },
+"bassboost": {
+    "description": "Enable/disable bass boost effect",
+    "enabledMessage": "Bass boost effect has been {status}",
+    "invalidValueTitle": "Invalid bass value",
+    "invalidValueDescription": "Bass value must be between 0.5 and 2.0.",
+    "successMessage": "Bass boost set to {value}"
+},
+
+
         "distorsion": {
             "description": "Enable/disable distorsion effect",
             "enabledMessage": "Distorsion effect has been {status}"
