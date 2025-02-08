@@ -33,19 +33,25 @@ module.exports = {
                 .setColor('#FF0000')
                 .setTitle(t.errors.lavalinkNotInitialized)
                 .setDescription(t.errors.initializationError);
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: 64 }); // 64 is the flag for ephemeral
         }
 
         const player = lavalink.getPlayer(guildId);
         if (!player) {
+            console.error(`Player not found for guild: ${guildId}`);
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.errors.noTrackPlaying)
                 .setDescription(t.errors.notPlaying);
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return interaction.reply({ embeds: [embed], flags: 64 });
         }
 
         const level = interaction.options.getString('level').toLowerCase();
+        if (!level) {
+            console.error('Bass boost level is undefined or empty');
+            return;
+        }
+
         try {
             switch (level) {
                 case 'high':
@@ -71,11 +77,12 @@ module.exports = {
             return interaction.reply({ embeds: [embed] });
         } catch (error) {
             console.error('Error in bassboost command:', error);
-            const embed = new EmbedBuilder()
-                .setColor('#FF0000')
-                .setTitle(t.errors.bassboostCommandError)
-                .setDescription(t.errors.genericError);
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+const embed = new EmbedBuilder()
+    .setColor('#FF0000')
+    .setTitle(t.errors.bassboostCommandError || "Unknown error") // Fallback, jeśli brak tytułu
+    .setDescription(t.errors.genericError || "An error occurred");
+
+            return interaction.reply({ embeds: [embed], flags: 64 });
         }
     },
 };
