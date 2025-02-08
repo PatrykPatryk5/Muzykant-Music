@@ -14,19 +14,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the repository's code
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # Set up CodeQL for analysis
       - name: Set up CodeQL
-        uses: github/codeql-action@3.28.9  # Używamy wersji 3.28.9
+        uses: github/codeql-action/setup-codeql@v3
 
+      # Initialize CodeQL database (no build step for interpreted languages)
       - name: Initialize CodeQL database
-        run: codeql database init --language=javascript  # Zmieniaj w zależności od języka
+        run: codeql database init --language=javascript # Zmieniaj w zależności od języka
 
+      # Perform CodeQL analysis
       - name: Perform CodeQL analysis
-        run: |
-          codeql bundle install codeql-bundle-v2.20.4  # Używamy wersji v2.20.4
-          codeql analyze --threads 2
+        run: codeql analyze --threads 2 # Możesz zmienić liczbę wątków
 
+      # Upload CodeQL results to GitHub
       - name: Upload CodeQL results
-        uses: github/codeql-action/upload-results@v3  # Zaktualizowana wersja
+        uses: github/codeql-action/upload-results@v2
