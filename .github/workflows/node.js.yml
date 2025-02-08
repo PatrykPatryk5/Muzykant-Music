@@ -25,7 +25,8 @@ jobs:
         cache: 'npm'
     - name: Set up .env file
       run: |
-        echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> .env
+        echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
         export $(cat .env | xargs)
+        echo "BOT_TOKEN is set to: $BOT_TOKEN"  # Debugging line
     - run: npm install
     - run: npm run start
