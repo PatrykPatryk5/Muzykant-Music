@@ -1,225 +1,231 @@
 {
-    "playCommand": {
-        "description": "Odtwórz utwór na podstawie zapytania lub linku",
-        "queryDescription": "Nazwa utworu lub URL"
-    },
-    "nowPlayingCommand": {
-        "description": "Wyświetl aktualnie odtwarzany utwór",
-        "nowPlaying": "Aktualnie odtwarzany utwór"
-    },
-    "pauseCommand": {
-        "description": "Zatrzymaj odtwarzanie utworu"
-    },
-    "queueCommand": {
-        "description": "Wyświetl obecną kolejkę utworów",
-        "currentQueue": "Obecna kolejka"
-    },
-    "resumeCommand": {
-        "description": "Wznów odtwarzanie utworu"
-    },
-    "skipCommand": {
-        "description": "Pomiń aktualny utwór"
-    },
-    "stopCommand": {
-        "description": "Zatrzymaj odtwarzanie i wyczyść kolejkę"
-    },
-    "volumeCommand": {
-        "description": "Ustaw lub wyświetl głośność odtwarzacza",
-        "currentVolume": "Aktualna głośność",
-        "currentVolumeLevel": "Aktualna głośność to"
-    },
-    "languageCommand": {
-        "description": "Ustaw preferowany język",
-        "languageOption": "Wybierz język",
-        "languageSet": "Ustawiono język na"
-    },
-    "errors": {
-        "8dCommandError": "Błąd komendy 8d",
-        "voiceChannelRequired": "Wymagany kanał głosowy",
-        "joinVoiceChannel": "Musisz być na kanale głosowym, aby odtwarzać muzykę.",
-        "lavalinkNotInitialized": "Lavalink nie zainicjalizowany",
-        "initializationError": "Lavalink nie został zainicjalizowany.",
-        "noMatches": "Brak wyników",
-        "noResultsFound": "Nie znaleziono wyników.",
-        "playCommandError": "Błąd komendy play",
-        "nowPlayingCommandError": "Błąd komendy nowplaying",
-        "pauseCommandError": "Błąd komendy pause",
-        "queueCommandError": "Błąd komendy queue",
-        "resumeCommandError": "Błąd komendy resume",
-        "skipCommandError": "Błąd komendy skip",
-        "stopCommandError": "Błąd komendy stop",
-        "volumeCommandError": "Błąd komendy volume",
-        "languageCommandError": "Błąd komendy language",
-        "genericError": "Wystąpił błąd podczas przetwarzania żądania.",
-        "noTrackPlaying": "Brak odtwarzanego utworu",
-        "notPlaying": "Aktualnie nie odtwarzam żadnego utworu.",
-        "noActivePlayer": "Brak aktywnego odtwarzacza",
-        "noPlayer": "Brak aktywnego odtwarzacza.",
-        "emptyQueue": "Pusta kolejka",
-        "noTracks": "Kolejka jest pusta.",
-        "invalidVolume": "Nieprawidłowa wartość głośności",
-        "couldNotLoad": "Nie można załadować tego utworu lub playlisty",
-        "volumeRange": "Głośność musi być pomiędzy 1 a 200.",
-        "voiceChannelRequired": "Wymagany kanał głosowy",
-        "joinVoiceChannel": "Musisz najpierw dołączyć do kanału głosowego",
-        "playerCreationError": "Błąd tworzenia odtwarzacza",
-        "playerCreationErrorDesc": "Wystąpił błąd podczas tworzenia odtwarzacza muzyki",
-        "connectionError": "Błąd połączenia",
-        "connectionErrorDesc": "Nie można połączyć się z kanałem głosowym",
-        "noResults": "Brak wyników",
-        "noResultsFound": "Nie znaleziono żadnych wyników dla twojego wyszukiwania",
-        "playbackError": "Błąd odtwarzania",
-        "playbackErrorDesc": "Wystąpił błąd podczas próby odtworzenia utworu",
-        "genericError": "Wystąpił błąd",
-        "genericErrorDesc": "Wystąpił nieoczekiwany błąd podczas przetwarzania twojego żądania",
-        "filtersCommandError": "Błąd komendy filters"
-    },
-    "success": {
-        "8dEnabled": "Efekt 8D został włączony",
-        "8dDisabled": "Efekt 8D został wyłączony",
-        "trackAdded": "Utwór dodany",
-        "addedToQueue": "Dodano do kolejki",
-        "trackPaused": "Utwór zatrzymany",
-        "paused": "Utwór został zatrzymany.",
-        "trackResumed": "Utwór wznowiony",
-        "resumed": "Odtwarzanie zostało wznowione.",
-        "trackSkipped": "Utwór pominięty",
-        "skipped": "Pominięto aktualny utwór.",
-        "playbackStopped": "Odtwarzanie zatrzymane",
-        "queueCleared": "Odtwarzanie zatrzymane i kolejka wyczyszczona.",
-        "volumeSet": "Głośność ustawiona",
-        "newVolume": "Nowa głośność to",
-        "playlistAdded": "Dodano playlistę",
-        "addedPlaylistToQueue": "Dodano playlistę z {count} utworami do kolejki",
-        "trackAdded": "Dodano utwór",
-        "bassboostSet": "Bassboost ustawiony",
-        "bassboostLevel": "Bassboost ustawiony na {level}",
-        "addedToQueue": "Dodano do kolejki",
-        "filtersCleared": "Filtry zostały wyczyszczone",
-        "lowpassEnabled": "Filtr LowPass został włączony",
-        "lowpassDisabled": "Filtr LowPass został wyłączony",
-        "nightcoreEnabled": "Filtr Nightcore został włączony",
-        "nightcoreDisabled": "Filtr Nightcore został wyłączony",
-        "vaporwaveEnabled": "Filtr Vaporwave został włączony",
-        "vaporwaveDisabled": "Filtr Vaporwave został wyłączony",
-        "karaokeEnabled": "Filtr Karaoke został włączony",
-        "karaokeDisabled": "Filtr Karaoke został wyłączony",
-        "rotationEnabled": "Filtr Rotation został włączony",
-        "rotationDisabled": "Filtr Rotation został wyłączony",
-        "tremoloEnabled": "Filtr Tremolo został włączony",
-        "tremoloDisabled": "Filtr Tremolo został wyłączony",
-        "vibratoEnabled": "Filtr Vibrato został włączony",
-        "vibratoDisabled": "Filtr Vibrato został wyłączony",
-        "echoEnabled": "Filtr Echo został włączony",
-        "echoDisabled": "Filtr Echo został wyłączony",
-        "reverbEnabled": "Filtr Reverb został włączony",
-        "reverbDisabled": "Filtr Reverb został wyłączony",
-        "highPassEnabled": "Filtr HighPass został włączony",
-        "highPassDisabled": "Filtr HighPass został wyłączony",
-        "normalizationEnabled": "Filtr Normalization został włączony",
-        "normalizationDisabled": "Filtr Normalization został wyłączony",
-        "filterToggle": "Przełącznik filtra",
-        "autoplayStatus": "Status autoodtwarzania: {status}",
-        "enabled": "włączony",
-        "disabled": "wyłączony"
-    },
-    "commands": {
-        "8d": {
-            "description": "Włącz/wyłącz efekt 8D",
-            "enabledMessage": "Efekt 8D został {status}"
-        },
-        "bassboost": {
-            "description": "Włącz/wyłącz efekt wzmocnienia basów",
-            "enabledMessage": "Efekt wzmocnienia basów został {status}",
-            "invalidValueTitle": "Nieprawidłowa wartość basów",
-            "invalidValueDescription": "Wartość basów musi być pomiędzy 0.5 a 2.0.",
-            "successMessage": "Wzmocnienie basów ustawione na {value}"
-        },
-        "distorsion": {
-            "description": "Włącz/wyłącz efekt zniekształcenia",
-            "enabledMessage": "Efekt zniekształcenia został {status}"
-        },
-        "karaoke": {
-            "description": "Włącz/wyłącz efekt karaoke",
-            "enabledMessage": "Efekt karaoke został {status}"
-        },
-        "nightcore": {
-            "description": "Włącz/wyłącz efekt nightcore",
-            "enabledMessage": "Efekt nightcore został {status}"
-        },
-        "pitch": {
-            "description": "Dostosuj wysokość dźwięku",
-            "invalidValueTitle": "Nieprawidłowa wartość wysokości dźwięku",
-            "invalidValueDescription": "Wartość wysokości dźwięku musi być pomiędzy 0.5 a 2.0.",
-            "successMessage": "Wysokość dźwięku ustawiona na {value}"
-        },
-        "rate": {
-            "description": "Dostosuj prędkość",
-            "invalidValueTitle": "Nieprawidłowa wartość prędkości",
-            "invalidValueDescription": "Wartość prędkości musi być pomiędzy 0.5 a 2.0.",
-            "successMessage": "Prędkość ustawiona na {value}"
-        },
-        "reset": {
-            "description": "Zresetuj wszystkie efekty",
-            "successMessage": "Wszystkie efekty zostały zresetowane"
-        },
-        "rotation": {
-            "description": "Włącz/wyłącz efekt obrotu",
-            "enabledMessage": "Efekt obrotu został {status}"
-        },
-        "speed": {
-            "description": "Dostosuj prędkość",
-            "invalidValueTitle": "Nieprawidłowa wartość prędkości",
-            "invalidValueDescription": "Wartość prędkości musi być pomiędzy 0.5 a 2.0.",
-            "successMessage": "Prędkość ustawiona na {value}"
-        },
-        "tremolo": {
-            "description": "Włącz/wyłącz efekt tremolo",
-            "enabledMessage": "Efekt tremolo został {status}"
-        },
-        "vibrato": {
-            "description": "Włącz/wyłącz efekt wibrato",
-            "enabledMessage": "Efekt wibrato został {status}"
-        },
-        "lowpass": {
-            "description": "Włącz/wyłącz efekt lowpass",
-            "enabledMessage": "Efekt lowpass został {status}"
-        },
-        "node": {
-            "description": "Uzyskaj informacje o węźle",
-            "connected": "Połączony",
-            "disconnected": "Rozłączony",
-            "players": "Odtwarzacze",
-            "uptime": "Czas działania",
-            "minutes": "minut"
-        },
-    "nodeCommand": {
-        "description": "Uzyskaj informacje o nodzie",
-        "nodeError": "Błąd noda",
-        "noNodeFound": "Nie znaleziono noda.",
-        "nodeInformation": "Informacje o nodzie",
-        "status": "Status",
-        "connected": "Połączony",
-        "disconnected": "Rozłączony",
-        "players": "Gracze",
-        "playingPlayers": "Grający gracze",
-        "uptime": "Czas działania",
-        "cpuLoad": "Obciążenie CPU",
-        "memoryUsage": "Zużycie pamięci",
-        "frameStats": "Statystyki ramek",
-        "error": "Błąd",
-        "genericError": "Wystąpił błąd podczas przetwarzania żądania."
-    },
-        "ping": {
-            "description": "Uzyskaj opóźnienie bota",
-            "latency": "Opóźnienie",
-            "apiLatency": "Opóźnienie API"
-        },
-        "help": {
-            "title": "Pomoc",
-            "description": "Lista dostępnych komend:"
-        }
-    },
+  "playCommand": {
+    "description": "Odtwórz utwór na podstawie zapytania lub linku",
+    "queryDescription": "Nazwa utworu lub URL"
+  },
+  "nowPlayingCommand": {
+    "description": "Wyświetl aktualnie odtwarzany utwór",
+    "nowPlaying": "Aktualnie odtwarzany utwór"
+  },
+  "pauseCommand": {
+    "description": "Zatrzymaj odtwarzanie utworu"
+  },
+  "queueCommand": {
+    "description": "Wyświetl obecną kolejkę utworów",
+    "currentQueue": "Obecna kolejka"
+  },
+  "resumeCommand": {
+    "description": "Wznów odtwarzanie utworu"
+  },
+  "skipCommand": {
+    "description": "Pomiń aktualny utwór"
+  },
+  "stopCommand": {
+    "description": "Zatrzymaj odtwarzanie i wyczyść kolejkę"
+  },
+  "volumeCommand": {
+    "description": "Ustaw lub wyświetl głośność odtwarzacza",
+    "currentVolume": "Aktualna głośność",
+    "currentVolumeLevel": "Aktualna głośność to"
+  },
+  "languageCommand": {
+    "description": "Ustaw preferowany język",
+    "languageOption": "Wybierz język",
+    "languageSet": "Ustawiono język na"
+  },
+  "errors": {
+    "8dCommandError": "Błąd komendy 8d",
+    "voiceChannelRequired": "Wymagany kanał głosowy",
+    "joinVoiceChannel": "Musisz być na kanale głosowym, aby odtwarzać muzykę.",
+    "lavalinkNotInitialized": "Lavalink nie zainicjalizowany",
+    "initializationError": "Lavalink nie został zainicjalizowany.",
+    "noMatches": "Brak wyników",
+    "noResultsFound": "Nie znaleziono wyników.",
+    "playCommandError": "Błąd komendy play",
+    "nowPlayingCommandError": "Błąd komendy nowplaying",
+    "pauseCommandError": "Błąd komendy pause",
+    "queueCommandError": "Błąd komendy queue",
+    "resumeCommandError": "Błąd komendy resume",
+    "skipCommandError": "Błąd komendy skip",
+    "stopCommandError": "Błąd komendy stop",
+    "volumeCommandError": "Błąd komendy volume",
+    "languageCommandError": "Błąd komendy language",
+    "genericError": "Wystąpił błąd podczas przetwarzania żądania.",
+    "noTrackPlaying": "Brak odtwarzanego utworu",
+    "notPlaying": "Aktualnie nie odtwarzam żadnego utworu.",
+    "noActivePlayer": "Brak aktywnego odtwarzacza",
+    "noPlayer": "Brak aktywnego odtwarzacza.",
+    "emptyQueue": "Pusta kolejka",
+    "noTracks": "Kolejka jest pusta.",
+    "invalidVolume": "Nieprawidłowa wartość głośności",
+    "couldNotLoad": "Nie można załadować tego utworu lub playlisty",
+    "volumeRange": "Głośność musi być pomiędzy 1 a 200.",
+    "voiceChannelRequired": "Wymagany kanał głosowy",
+    "joinVoiceChannel": "Musisz najpierw dołączyć do kanału głosowego",
+    "playerCreationError": "Błąd tworzenia odtwarzacza",
+    "playerCreationErrorDesc": "Wystąpił błąd podczas tworzenia odtwarzacza muzyki",
+    "connectionError": "Błąd połączenia",
+    "connectionErrorDesc": "Nie można połączyć się z kanałem głosowym",
+    "noResults": "Brak wyników",
+    "noResultsFound": "Nie znaleziono żadnych wyników dla twojego wyszukiwania",
+    "playbackError": "Błąd odtwarzania",
+    "playbackErrorDesc": "Wystąpił błąd podczas próby odtworzenia utworu",
+    "genericError": "Wystąpił błąd",
+    "genericErrorDesc": "Wystąpił nieoczekiwany błąd podczas przetwarzania twojego żądania",
+    "filtersCommandError": "Błąd komendy filters"
+  },
+  "success": {
+    "8dEnabled": "Efekt 8D został włączony",
+    "8dDisabled": "Efekt 8D został wyłączony",
+    "trackAdded": "Utwór dodany",
+    "addedToQueue": "Dodano do kolejki",
+    "trackPaused": "Utwór zatrzymany",
+    "paused": "Utwór został zatrzymany.",
+    "trackResumed": "Utwór wznowiony",
+    "resumed": "Odtwarzanie zostało wznowione.",
+    "trackSkipped": "Utwór pominięty",
+    "skipped": "Pominięto aktualny utwór.",
+    "playbackStopped": "Odtwarzanie zatrzymane",
+    "queueCleared": "Odtwarzanie zatrzymane i kolejka wyczyszczona.",
+    "volumeSet": "Głośność ustawiona",
+    "newVolume": "Nowa głośność to",
+    "playlistAdded": "Dodano playlistę",
+    "addedPlaylistToQueue": "Dodano playlistę z {count} utworami do kolejki",
+    "trackAdded": "Dodano utwór",
+    "bassboostSet": "Bassboost ustawiony",
+    "bassboostLevel": "Bassboost ustawiony na {level}",
+    "addedToQueue": "Dodano do kolejki",
+    "filtersCleared": "Filtry zostały wyczyszczone",
+    "lowpassEnabled": "Filtr LowPass został włączony",
+    "lowpassDisabled": "Filtr LowPass został wyłączony",
+    "nightcoreEnabled": "Filtr Nightcore został włączony",
+    "nightcoreDisabled": "Filtr Nightcore został wyłączony",
+    "vaporwaveEnabled": "Filtr Vaporwave został włączony",
+    "vaporwaveDisabled": "Filtr Vaporwave został wyłączony",
+    "karaokeEnabled": "Filtr Karaoke został włączony",
+    "karaokeDisabled": "Filtr Karaoke został wyłączony",
+    "rotationEnabled": "Filtr Rotation został włączony",
+    "rotationDisabled": "Filtr Rotation został wyłączony",
+    "tremoloEnabled": "Filtr Tremolo został włączony",
+    "tremoloDisabled": "Filtr Tremolo został wyłączony",
+    "vibratoEnabled": "Filtr Vibrato został włączony",
+    "vibratoDisabled": "Filtr Vibrato został wyłączony",
+    "echoEnabled": "Filtr Echo został włączony",
+    "echoDisabled": "Filtr Echo został wyłączony",
+    "reverbEnabled": "Filtr Reverb został włączony",
+    "reverbDisabled": "Filtr Reverb został wyłączony",
+    "highPassEnabled": "Filtr HighPass został włączony",
+    "highPassDisabled": "Filtr HighPass został wyłączony",
+    "normalizationEnabled": "Filtr Normalization został włączony",
+    "normalizationDisabled": "Filtr Normalization został wyłączony",
+    "filterToggle": "Przełącznik filtra",
+    "autoplayStatus": "Status autoodtwarzania: {status}",
     "enabled": "włączony",
     "disabled": "wyłączony"
+  },
+  "commands": {
+    "8d": {
+      "description": "Włącz/wyłącz efekt 8D",
+      "enabledMessage": "Efekt 8D został {status}"
+    },
+    "bassboost": {
+      "description": "Włącz/wyłącz efekt wzmocnienia basów",
+      "enabledMessage": "Efekt wzmocnienia basów został {status}",
+      "invalidValueTitle": "Nieprawidłowa wartość basów",
+      "invalidValueDescription": "Wartość basów musi być pomiędzy 0.5 a 2.0.",
+      "successMessage": "Wzmocnienie basów ustawione na {value}"
+    },
+    "distorsion": {
+      "description": "Włącz/wyłącz efekt zniekształcenia",
+      "enabledMessage": "Efekt zniekształcenia został {status}"
+    },
+    "karaoke": {
+      "description": "Włącz/wyłącz efekt karaoke",
+      "enabledMessage": "Efekt karaoke został {status}"
+    },
+    "nightcore": {
+      "description": "Włącz/wyłącz efekt nightcore",
+      "enabledMessage": "Efekt nightcore został {status}"
+    },
+    "pitch": {
+      "description": "Dostosuj wysokość dźwięku",
+      "invalidValueTitle": "Nieprawidłowa wartość wysokości dźwięku",
+      "invalidValueDescription": "Wartość wysokości dźwięku musi być pomiędzy 0.5 a 2.0.",
+      "successMessage": "Wysokość dźwięku ustawiona na {value}"
+    },
+    "rate": {
+      "description": "Dostosuj prędkość",
+      "invalidValueTitle": "Nieprawidłowa wartość prędkości",
+      "invalidValueDescription": "Wartość prędkości musi być pomiędzy 0.5 a 2.0.",
+      "successMessage": "Prędkość ustawiona na {value}"
+    },
+    "reset": {
+      "description": "Zresetuj wszystkie efekty",
+      "successMessage": "Wszystkie efekty zostały zresetowane"
+    },
+    "rotation": {
+      "description": "Włącz/wyłącz efekt obrotu",
+      "enabledMessage": "Efekt obrotu został {status}"
+    },
+    "speed": {
+      "description": "Dostosuj prędkość",
+      "invalidValueTitle": "Nieprawidłowa wartość prędkości",
+      "invalidValueDescription": "Wartość prędkości musi być pomiędzy 0.5 a 2.0.",
+      "successMessage": "Prędkość ustawiona na {value}"
+    },
+    "tremolo": {
+      "description": "Włącz/wyłącz efekt tremolo",
+      "enabledMessage": "Efekt tremolo został {status}"
+    },
+    "vibrato": {
+      "description": "Włącz/wyłącz efekt wibrato",
+      "enabledMessage": "Efekt wibrato został {status}"
+    },
+    "lowpass": {
+      "description": "Włącz/wyłącz efekt lowpass",
+      "enabledMessage": "Efekt lowpass został {status}"
+    },
+    "node": {
+      "description": "Uzyskaj informacje o węźle",
+      "connected": "Połączony",
+      "disconnected": "Rozłączony",
+      "players": "Odtwarzacze",
+      "uptime": "Czas działania",
+      "minutes": "minut"
+    },
+    "nodeCommand": {
+      "description": "Uzyskaj informacje o nodzie",
+      "nodeError": "Błąd noda",
+      "noNodeFound": "Nie znaleziono noda.",
+      "nodeInformation": "Informacje o nodzie",
+      "status": "Status",
+      "connected": "Połączony",
+      "disconnected": "Rozłączony",
+      "players": "Gracze",
+      "playingPlayers": "Grający gracze",
+      "uptime": "Czas działania",
+      "cpuLoad": "Obciążenie CPU",
+      "memoryUsage": "Zużycie pamięci",
+      "frameStats": "Statystyki ramek",
+      "error": "Błąd",
+      "genericError": "Wystąpił błąd podczas przetwarzania żądania."
+    },
+    "logs": {
+      "autoplayTriggered": "Autoodtwarzanie zostało uruchomione",
+      "autoplayNotDisabled": "Autoodtwarzanie nie jest wyłączone",
+      "autoplayDisabled": "Autoodtwarzanie zostało wyłączone",
+      "noLastTrack": "Brak ostatniego utworu"
+    },
+    "ping": {
+      "description": "Uzyskaj opóźnienie bota",
+      "latency": "Opóźnienie",
+      "apiLatency": "Opóźnienie API"
+    },
+    "help": {
+      "title": "Pomoc",
+      "description": "Lista dostępnych komend:"
+    }
+  },
+  "enabled": "włączony",
+  "disabled": "wyłączony"
 }
