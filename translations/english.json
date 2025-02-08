@@ -1,183 +1,178 @@
 {
     "playCommand": {
-        "description": "Play a track based on a query or link",
-        "queryDescription": "Track name or URL"
+        "description": "Odtwórz utwór na podstawie zapytania lub linku",
+        "queryDescription": "Nazwa utworu lub URL"
     },
     "nowPlayingCommand": {
-        "description": "Display the currently playing track",
-        "nowPlaying": "Currently playing track"
+        "description": "Wyświetl aktualnie odtwarzany utwór",
+        "nowPlaying": "Aktualnie odtwarzany utwór"
     },
     "pauseCommand": {
-        "description": "Pause the current track"
+        "description": "Zatrzymaj odtwarzanie utworu"
     },
     "queueCommand": {
-        "description": "Display the current track queue",
-        "currentQueue": "Current queue"
+        "description": "Wyświetl obecną kolejkę utworów",
+        "currentQueue": "Obecna kolejka"
     },
     "resumeCommand": {
-        "description": "Resume the current track"
+        "description": "Wznów odtwarzanie utworu"
     },
     "skipCommand": {
-        "description": "Skip the current track"
+        "description": "Pomiń aktualny utwór"
     },
     "stopCommand": {
-        "description": "Stop playback and clear the queue"
+        "description": "Zatrzymaj odtwarzanie i wyczyść kolejkę"
     },
     "volumeCommand": {
-        "description": "Set or display the player volume",
-        "currentVolume": "Current volume",
-        "currentVolumeLevel": "Current volume is"
+        "description": "Ustaw lub wyświetl głośność odtwarzacza",
+        "currentVolume": "Aktualna głośność",
+        "currentVolumeLevel": "Aktualna głośność to"
     },
     "languageCommand": {
-        "description": "Set the preferred language",
-        "languageOption": "Select language",
-        "languageSet": "Language set to"
+        "description": "Ustaw preferowany język",
+        "languageOption": "Wybierz język",
+        "languageSet": "Ustawiono język na"
     },
     "errors": {
-        "voiceChannelRequired": "Voice channel required",
-        "joinVoiceChannel": "You must be in a voice channel to play music.",
-        "lavalinkNotInitialized": "Lavalink not initialized",
-        "initializationError": "Lavalink has not been initialized.",
-        "noMatches": "No matches found",
-        "noResultsFound": "No results found.",
-        "playCommandError": "Error in play command",
-        "nowPlayingCommandError": "Error in nowplaying command",
-        "pauseCommandError": "Error in pause command",
-        "queueCommandError": "Error in queue command",
-        "resumeCommandError": "Error in resume command",
-        "skipCommandError": "Error in skip command",
-        "stopCommandError": "Error in stop command",
-        "volumeCommandError": "Error in volume command",
-        "languageCommandError": "Error in language command",
-        "genericError": "An error occurred while processing the request.",
-        "noTrackPlaying": "No track playing",
-        "notPlaying": "I am not playing any track currently.",
-        "noActivePlayer": "No active player",
-        "noPlayer": "No active player.",
-        "emptyQueue": "Queue is empty",
-        "noTracks": "The queue is empty.",
-        "invalidVolume": "Invalid volume value",
-        "volumeRange": "Volume must be between 1 and 200.",
-        "loadFailed": "Load failed",
-        "couldNotLoad": "Could not load this track or playlist",
-        "voiceChannelRequired": "Voice channel required",
-        "joinVoiceChannel": "You need to join a voice channel first",
-        "playerCreationError": "Player creation error",
-        "playerCreationErrorDesc": "An error occurred while creating the music player",
-        "connectionError": "Connection error",
-        "connectionErrorDesc": "Could not connect to the voice channel",
-        "noResults": "No results",
-        "noResultsFound": "No results found for your search",
-        "playbackError": "Playback error",
-        "playbackErrorDesc": "An error occurred while trying to play the track",
-        "genericError": "Error occurred",
-        "genericErrorDesc": "An unexpected error occurred while processing your request"
+        "voiceChannelRequired": "Wymagany kanał głosowy",
+        "joinVoiceChannel": "Musisz być na kanale głosowym, aby odtwarzać muzykę.",
+        "lavalinkNotInitialized": "Lavalink nie zainicjalizowany",
+        "initializationError": "Lavalink nie został zainicjalizowany.",
+        "noMatches": "Brak wyników",
+        "noResultsFound": "Nie znaleziono wyników.",
+        "playCommandError": "Błąd komendy play",
+        "nowPlayingCommandError": "Błąd komendy nowplaying",
+        "pauseCommandError": "Błąd komendy pause",
+        "queueCommandError": "Błąd komendy queue",
+        "resumeCommandError": "Błąd komendy resume",
+        "skipCommandError": "Błąd komendy skip",
+        "stopCommandError": "Błąd komendy stop",
+        "volumeCommandError": "Błąd komendy volume",
+        "languageCommandError": "Błąd komendy language",
+        "genericError": "Wystąpił błąd podczas przetwarzania żądania.",
+        "noTrackPlaying": "Brak odtwarzanego utworu",
+        "notPlaying": "Aktualnie nie odtwarzam żadnego utworu.",
+        "noActivePlayer": "Brak aktywnego odtwarzacza",
+        "noPlayer": "Brak aktywnego odtwarzacza.",
+        "emptyQueue": "Pusta kolejka",
+        "noTracks": "Kolejka jest pusta.",
+        "invalidVolume": "Nieprawidłowa wartość głośności",
+        "couldNotLoad": "Nie można załadować tego utworu lub playlisty",
+        "volumeRange": "Głośność musi być pomiędzy 1 a 200.",
+        "voiceChannelRequired": "Wymagany kanał głosowy",
+        "joinVoiceChannel": "Musisz najpierw dołączyć do kanału głosowego",
+        "playerCreationError": "Błąd tworzenia odtwarzacza",
+        "playerCreationErrorDesc": "Wystąpił błąd podczas tworzenia odtwarzacza muzyki",
+        "connectionError": "Błąd połączenia",
+        "connectionErrorDesc": "Nie można połączyć się z kanałem głosowym",
+        "noResults": "Brak wyników",
+        "noResultsFound": "Nie znaleziono żadnych wyników dla twojego wyszukiwania",
+        "playbackError": "Błąd odtwarzania",
+        "playbackErrorDesc": "Wystąpił błąd podczas próby odtworzenia utworu",
+        "genericError": "Wystąpił błąd",
+        "genericErrorDesc": "Wystąpił nieoczekiwany błąd podczas przetwarzania twojego żądania"
     },
     "success": {
-        "trackAdded": "Track added",
-        "addedToQueue": "Added to queue",
-        "trackPaused": "Track paused",
-        "paused": "Track has been paused.",
-        "trackResumed": "Track resumed",
-        "resumed": "Playback has been resumed.",
-        "trackSkipped": "Track skipped",
-        "skipped": "Skipped the current track.",
-        "playbackStopped": "Playback stopped",
-        "queueCleared": "Playback stopped and queue cleared.",
-        "volumeSet": "Volume set",
-        "newVolume": "New volume is",
-        "playlistAdded": "Playlist added",
-        "addedPlaylistToQueue": "Added playlist to queue",
-        "trackCount": "Number of tracks",
-        "playlistAdded": "Playlist added",
-        "addedPlaylistToQueue": "Added playlist with {count} tracks to the queue",
-        "trackAdded": "Track added",
-        "bassboostSet": "Bassboost set",
-        "bassboostLevel": "Bassboost set to {level}",
-        "addedToQueue": "Added to the queue"
+        "trackAdded": "Utwór dodany",
+        "addedToQueue": "Dodano do kolejki",
+        "trackPaused": "Utwór zatrzymany",
+        "paused": "Utwór został zatrzymany.",
+        "trackResumed": "Utwór wznowiony",
+        "resumed": "Odtwarzanie zostało wznowione.",
+        "trackSkipped": "Utwór pominięty",
+        "skipped": "Pominięto aktualny utwór.",
+        "playbackStopped": "Odtwarzanie zatrzymane",
+        "queueCleared": "Odtwarzanie zatrzymane i kolejka wyczyszczona.",
+        "volumeSet": "Głośność ustawiona",
+        "newVolume": "Nowa głośność to",
+        "playlistAdded": "Dodano playlistę",
+        "addedPlaylistToQueue": "Dodano playlistę z {count} utworami do kolejki",
+        "trackAdded": "Dodano utwór",
+        "bassboostSet": "Bassboost ustawiony",
+        "bassboostLevel": "Bassboost ustawiony na {level}",
+        "addedToQueue": "Dodano do kolejki"
     },
     "commands": {
         "8d": {
-            "description": "Enable/disable 8D audio effect",
-            "enabledMessage": "8D audio effect has been {status}"
+            "description": "Włącz/wyłącz efekt 8D",
+            "enabledMessage": "Efekt 8D został {status}"
         },
 "bassboost": {
-    "description": "Enable/disable bass boost effect",
-    "enabledMessage": "Bass boost effect has been {status}",
-    "invalidValueTitle": "Invalid bass value",
-    "invalidValueDescription": "Bass value must be between 0.5 and 2.0.",
-    "successMessage": "Bass boost set to {value}"
+    "description": "Włącz/wyłącz efekt wzmocnienia basów",
+    "enabledMessage": "Efekt wzmocnienia basów został {status}",
+    "invalidValueTitle": "Nieprawidłowa wartość basów",
+    "invalidValueDescription": "Wartość basów musi być pomiędzy 0.5 a 2.0.",
+    "successMessage": "Wzmocnienie basów ustawione na {value}"
 },
 
-
         "distorsion": {
-            "description": "Enable/disable distorsion effect",
-            "enabledMessage": "Distorsion effect has been {status}"
+            "description": "Włącz/wyłącz efekt zniekształcenia",
+            "enabledMessage": "Efekt zniekształcenia został {status}"
         },
         "karaoke": {
-            "description": "Enable/disable karaoke effect",
-            "enabledMessage": "Karaoke effect has been {status}"
+            "description": "Włącz/wyłącz efekt karaoke",
+            "enabledMessage": "Efekt karaoke został {status}"
         },
         "nightcore": {
-            "description": "Enable/disable nightcore effect",
-            "enabledMessage": "Nightcore effect has been {status}"
+            "description": "Włącz/wyłącz efekt nightcore",
+            "enabledMessage": "Efekt nightcore został {status}"
         },
         "pitch": {
-            "description": "Adjust the pitch",
-            "invalidValueTitle": "Invalid Pitch Value",
-            "invalidValueDescription": "Pitch value must be between 0.5 and 2.0.",
-            "successMessage": "Pitch has been set to {value}"
+            "description": "Dostosuj wysokość dźwięku",
+            "invalidValueTitle": "Nieprawidłowa wartość wysokości dźwięku",
+            "invalidValueDescription": "Wartość wysokości dźwięku musi być pomiędzy 0.5 a 2.0.",
+            "successMessage": "Wysokość dźwięku ustawiona na {value}"
         },
         "rate": {
-            "description": "Adjust the rate",
-            "invalidValueTitle": "Invalid Rate Value",
-            "invalidValueDescription": "Rate value must be between 0.5 and 2.0.",
-            "successMessage": "Rate has been set to {value}"
+            "description": "Dostosuj prędkość",
+            "invalidValueTitle": "Nieprawidłowa wartość prędkości",
+            "invalidValueDescription": "Wartość prędkości musi być pomiędzy 0.5 a 2.0.",
+            "successMessage": "Prędkość ustawiona na {value}"
         },
         "reset": {
-            "description": "Reset all effects",
-            "successMessage": "All effects have been reset"
+            "description": "Zresetuj wszystkie efekty",
+            "successMessage": "Wszystkie efekty zostały zresetowane"
         },
         "rotation": {
-            "description": "Enable/disable rotation effect",
-            "enabledMessage": "Rotation effect has been {status}"
+            "description": "Włącz/wyłącz efekt obrotu",
+            "enabledMessage": "Efekt obrotu został {status}"
         },
         "speed": {
-            "description": "Adjust the speed",
-            "invalidValueTitle": "Invalid Speed Value",
-            "invalidValueDescription": "Speed value must be between 0.5 and 2.0.",
-            "successMessage": "Speed has been set to {value}"
+            "description": "Dostosuj prędkość",
+            "invalidValueTitle": "Nieprawidłowa wartość prędkości",
+            "invalidValueDescription": "Wartość prędkości musi być pomiędzy 0.5 a 2.0.",
+            "successMessage": "Prędkość ustawiona na {value}"
         },
         "tremolo": {
-            "description": "Enable/disable tremolo effect",
-            "enabledMessage": "Tremolo effect has been {status}"
+            "description": "Włącz/wyłącz efekt tremolo",
+            "enabledMessage": "Efekt tremolo został {status}"
         },
         "vibrato": {
-            "description": "Enable/disable vibrato effect",
-            "enabledMessage": "Vibrato effect has been {status}"
+            "description": "Włącz/wyłącz efekt wibrato",
+            "enabledMessage": "Efekt wibrato został {status}"
         },
         "lowpass": {
-            "description": "Enable/disable lowpass effect",
-            "enabledMessage": "Lowpass effect has been {status}"
+            "description": "Włącz/wyłącz efekt lowpass",
+            "enabledMessage": "Efekt lowpass został {status}"
         },
         "node": {
-            "description": "Get information about the node",
-            "connected": "Connected",
-            "disconnected": "Disconnected",
-            "players": "Players",
-            "uptime": "Uptime",
-            "minutes": "minutes"
+            "description": "Uzyskaj informacje o węźle",
+            "connected": "Połączony",
+            "disconnected": "Rozłączony",
+            "players": "Odtwarzacze",
+            "uptime": "Czas działania",
+            "minutes": "minut"
         },
         "ping": {
-            "description": "Get the bot's latency",
-            "latency": "Latency",
-            "apiLatency": "API Latency"
+            "description": "Uzyskaj opóźnienie bota",
+            "latency": "Opóźnienie",
+            "apiLatency": "Opóźnienie API"
         },
         "help": {
-            "title": "Help",
-            "description": "List of available commands:"
+            "title": "Pomoc",
+            "description": "Lista dostępnych komend:"
         }
     },
-    "enabled": "enabled",
-    "disabled": "disabled"
+    "enabled": "włączony",
+    "disabled": "wyłączony"
 }
