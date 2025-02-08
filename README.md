@@ -43,14 +43,22 @@ Muzykant Music Bot is a Discord bot designed to provide a rich music playing exp
 
 ## Usage
 
-1. Start the bot:
-    ```bash
-    npm run start
-    ```
+1. **Register commands on Discord:**
+   To register your bot's commands on Discord, use the command:
+   ```bash
+   npm run deploy
+   ```
+   This will register the commands that your bot will use on your Discord server. Make sure you have the appropriate permissions to register commands.
 
-2. The bot should now be online and ready to use in your Discord server.
+2. **Start the bot:**
+   To start the bot and get it running on your Discord server, use:
+   ```bash
+   npm run start
+   ```
 
-> **Important:** This script **cannot be used on public bots**—it is intended for use on **private bots only**!
+3. **The bot should now be online and ready to use on your Discord server.**
+
+> **Important:** This script **cannot be used on public bots**—it is intended for use on **private bots only**.
 
 ## Contributing
 
