@@ -147,8 +147,10 @@ module.exports = {
                     .setColor('#FF0000')
                     .setTitle(t.errors.noMatches)
                     .setDescription(t.errors.noResultsFound);
-                return interaction.editReply({ embeds: [embed] });
+                return interaction.editReply({ embeds: [embed], ephemeral: true });
             }
+
+            let controlPanelMessage = null;
 
             if (res.loadType === 'PLAYLIST_LOADED') {
                 for (const track of res.tracks) {
@@ -159,20 +161,14 @@ module.exports = {
                     await player.play();
                 }
 
-                const embed = new EmbedBuilder()
-                    .setColor('#00FF00')
-                    .setTitle(t.success.playlistAdded)
-                    .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
-
-                const message = await interaction.editReply({ embeds: [embed] });
-                setTimeout(async () => {
-                    try {
-                        await message.delete();
-                        await sendControlPanel(interaction, player);
-                    } catch (error) {
-                        console.error('Error handling playlist message:', error);
-                    }
-                }, 5000);
+                await interaction.editReply({ 
+                    content: `Dodano playlistę: **${res.playlistInfo?.name || 'Unknown Playlist'}** (${res.tracks.length} utworów)`,
+                    ephemeral: true 
+                });
+                
+                if (!controlPanelMessage) {
+                    controlPanelMessage = await sendControlPanel(interaction, player);
+                }
             } else {
                 const track = res.tracks[0];
                 player.queue.add(track);
@@ -181,86 +177,72 @@ module.exports = {
                     await player.play();
                 }
 
-                const embed = new EmbedBuilder()
-                    .setColor('#00FF00')
-                    .setTitle(t.success.trackAdded)
-                    .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
+                await interaction.editReply({ 
+                    content: `Dodano do kolejki: **${track.info?.title || 'Unknown Title'}**`,
+                    ephemeral: true 
+                });
 
-                const message = await interaction.editReply({ embeds: [embed] });
-                setTimeout(async () => {
-                    try {
-                        await message.delete();
-                        await sendControlPanel(interaction, player);
-                    } catch (error) {
-                        console.error('Error handling track message:', error);
-                    }
-                }, 5000);
+                if (!controlPanelMessage) {
+                    controlPanelMessage = await sendControlPanel(interaction, player);
+                }
             }
 
-const collector = interaction.channel.createMessageComponentCollector();
-collector.on('collect', async i => {
-    try {
-        switch (i.customId) {
-            case 'previous':
+            // Create a new collector for each control panel
+            const collector = controlPanelMessage.createMessageComponentCollector({
+                time: 3600000 // 1 hour
+            });
+
+            collector.on('collect', async (i) => {
+                // Acknowledge the interaction immediately
+                await i.deferUpdate().catch(() => {});
+
                 try {
-                    const previous = await player.queue.shiftPrevious();
-                    if (previous) {
-                        await player.play({ clientTrack: previous });
+                    switch (i.customId) {
+                        case 'previous':
+                            const previous = await player.queue.shiftPrevious().catch(() => null);
+                            if (previous) {
+                                await player.play({ clientTrack: previous });
+                            }
+                            break;
+                        case 'pause_resume':
+                            if (player.playing && !player.paused) {
+                                await player.pause();
+                            } else if (player.paused) {
+                                await player.resume();
+                            }
+                            break;
+                        case 'stop':
+                            player.destroy();
+                            await controlPanelMessage.delete().catch(() => {});
+                            clearInterval(updateInterval);
+                            break;
+                        case 'next':
+                            await player.skip();
+                            break;
+                    }
+
+                    if (player.playing && i.customId !== 'stop') {
+                        await updateControlPanel(controlPanelMessage, player);
                     }
                 } catch (error) {
-                    console.error('Error playing previous track:', error);
+                    console.error('Error handling button:', error);
                 }
-                break;
-            case 'pause_resume':
-                try {
-                    if (player.playing && !player.paused) {
-                        await player.pause();
-                    } else if (player.paused) {
-                        await player.resume();
-                    }
-                } catch (error) {
-                    console.error('Error toggling pause state:', error);
+            });
+
+            // Clean up when the collector ends
+            collector.on('end', () => {
+                if (controlPanelMessage) {
+                    controlPanelMessage.delete().catch(() => {});
                 }
-                break;
-            case 'stop':
-                try {
-                    player.queue.clear();
-                    player.skip();
-                    player.disconnect();
-                } catch (error) {
-                    console.error('Error stopping playback:', error);
-                }
-                if (interaction.message) {
-                    await interaction.message.delete();
-                }
-                break;
-            case 'next':
-                try {
-                    if (player.queue.size > 0) {
-                        player.skip();
-                    }
-                } catch (error) {
-                    console.error('Error skipping track:', error);
-                }
-                break;
-        }
-        await i.deferUpdate();
-        if (player.playing) {
-            await updateControlPanel(interaction, player);
-        }
-    } catch (error) {
-        console.error('Error handling button interaction:', error);
-        await i.deferUpdate();
-    }
-});
+                clearInterval(updateInterval);
+            });
 
         } catch (error) {
             console.error('Error in play command:', error);
-            const embed = new EmbedBuilder()
-                .setColor('#FF0000')
-                .setTitle(t.errors.playCommandError)
-                .setDescription(t.errors.genericError);
-            return interaction.editReply({ embeds: [embed] });
+            return interaction.editReply({ 
+                content: 'Wystąpił błąd podczas odtwarzania.',
+                ephemeral: true 
+            });
         }
     },
 };
