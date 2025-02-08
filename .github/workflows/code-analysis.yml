@@ -20,7 +20,7 @@ jobs:
 
       # Set up CodeQL for analysis
       - name: Set up CodeQL
-        uses: github/codeql-action/setup-codeql@v3
+        uses: github/codeql-action/setup-codeql@v2 # Zmieniona wersja na v2
 
       # Initialize CodeQL database (no build step for interpreted languages)
       - name: Initialize CodeQL database
