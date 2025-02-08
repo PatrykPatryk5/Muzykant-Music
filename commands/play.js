@@ -195,6 +195,34 @@ module.exports = {
                 await interaction.editReply({ embeds: [embed] });
                 setTimeout(() => sendControlPanel(interaction, player), 5000);
             }
+
+            // Add button interaction listeners
+            const collector = interaction.channel.createMessageComponentCollector();
+            collector.on('collect', async i => {
+                if (i.customId === 'previous') {
+                    // Handle previous button interaction
+                    await player.queue.previous();
+                    await i.update({ content: 'Previous track played.', components: [] });
+                } else if (i.customId === 'pause_resume') {
+                    // Handle pause/resume button interaction
+                    if (player.paused) {
+                        player.pause(false);
+                        await i.update({ content: 'Playback resumed.', components: [] });
+                    } else {
+                        player.pause(true);
+                        await i.update({ content: 'Playback paused.', components: [] });
+                    }
+                } else if (i.customId === 'stop') {
+                    // Handle stop button interaction
+                    player.stop();
+                    await i.update({ content: 'Playback stopped.', components: [] });
+                } else if (i.customId === 'next') {
+                    // Handle next button interaction
+                    await player.queue.next();
+                    await i.update({ content: 'Next track played.', components: [] });
+                }
+            });
+
         } catch (error) {
             console.error('Error in play command:', error);
             const embed = new EmbedBuilder()
