@@ -10,11 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Używamy tylko jednej wersji Node.js
     strategy:
       matrix:
-        node-version: [22.x]  # Możesz zmienić na dowolną wersję Node.js, którą chcesz testować
-        # Jeśli chcesz zmienić wersję, po prostu zmień na np. [20.x]
+        node-version: [22.x]  # Możesz zmienić na dowolną wersję Node.js
 
     steps:
     - uses: actions/checkout@v4
@@ -29,15 +27,15 @@ jobs:
         export $(cat .env | xargs)
         echo "BOT_TOKEN is set to: $BOT_TOKEN"  # Debugging line
     - run: npm install
-    - run: npm run start
-    - name: Wait for 10 seconds and check logs
+    - name: Run bot
       run: |
+        npm run start  # Uruchomienie bota
         sleep 10  # Czekaj 10 sekund na uruchomienie bota
-        # Sprawdzamy, czy pojawił się jakiś błąd
+        # Sprawdzamy, czy pojawiły się błędy w logach
         if grep -q -e "Unhandled promise rejection" -e "error" -e "Exception" -e "fatal" logs.txt; then
           echo "Test niepowodzenia: Wystąpił poważny błąd w logach!"
           exit 1
         else
           echo "Test zakończony sukcesem: Bot działa bez krytycznych błędów."
-          exit 0  # Jeśli nie znaleziono błędów, zakończ z sukcesem
+          exit 0  # Zakończenie z sukcesem, jeśli nie znaleziono błędów
         fi
