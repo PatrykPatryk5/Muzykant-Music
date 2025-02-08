@@ -13,10 +13,7 @@ module.exports = {
         const userLang = db.prepare('SELECT language FROM user_preferences WHERE user_id = ?').get(interaction.user.id)?.language || 'pl';
         const t = translations[userLang];
 
-        if (!t || !t.nodeCommand) {
-            console.error('Translations for nodeCommand are not defined');
-            return interaction.reply({ content: 'Translation error', ephemeral: true });
-        }
+
 
         const guildId = interaction.guildId;
         if (!guildId) return;
