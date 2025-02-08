@@ -94,7 +94,7 @@ async function sendControlPanel(interaction, player) {
   interaction.message = message;
 
   if (player.playing) {
-    setTimeout(() => updateControlPanel(interaction, player), 5000);
+    setTimeout(() => updateControlPanel(interaction, player), 10000);
   }
 }
 
@@ -126,7 +126,7 @@ async function updateControlPanel(interaction, player) {
     await interaction.message.edit({ embeds: [embed], components: [row] });
 
     if (player.playing) {
-      setTimeout(() => updateControlPanel(interaction, player), 5000);
+      setTimeout(() => updateControlPanel(interaction, player), 10000);
     }
   } catch (error) {
     if (error.code === 10008) {
