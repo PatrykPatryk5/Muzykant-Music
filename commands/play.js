@@ -1,9 +1,113 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const db = require('../database');
 const translations = {
     pl: require('../translations/polish.json'),
     en: require('../translations/english.json')
 };
+
+function parseDuration(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function progressBar(current, total, size = 20) {
+    const percent = Math.round((current / total) * 100);
+    const filledSize = Math.round((size * current) / total);
+    const filledBar = '▓'.repeat(filledSize);
+    const emptyBar = '░'.repeat(size - filledSize);
+    return `${filledBar}${emptyBar} ${percent}%`;
+}
+
+async function sendControlPanel(interaction, player) {
+    const track = player.queue.current;
+    const position = player.position;
+    const duration = track.info.length || track.info.duration || 0;
+
+    const progressBarText = progressBar(position, duration);
+    const currentTime = parseDuration(position);
+    const totalTime = parseDuration(duration);
+
+    const embed = new EmbedBuilder()
+        .setColor('#00FF00')
+        .setTitle('Odtwarzanie')
+        .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
+
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('previous')
+                .setLabel('⏮️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('pause_resume')
+                .setLabel(player.paused ? '▶️' : '⏸️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('stop')
+                .setLabel('⏹️')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId('next')
+                .setLabel('⏭️')
+                .setStyle(ButtonStyle.Primary)
+        );
+
+    const message = await interaction.channel.send({ embeds: [embed], components: [row] });
+    interaction.message = message;
+
+    setTimeout(async () => {
+        if (player.playing) {
+            await updateControlPanel(interaction, player);
+        }
+    }, 5000);
+}
+
+async function updateControlPanel(interaction, player) {
+    const track = player.queue.current;
+    const position = player.position;
+    const duration = track.info.length || track.info.duration || 0;
+
+    const progressBarText = progressBar(position, duration);
+    const currentTime = parseDuration(position);
+    const totalTime = parseDuration(duration);
+
+    const embed = new EmbedBuilder()
+        .setColor('#00FF00')
+        .setTitle('Odtwarzanie')
+        .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
+
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('previous')
+                .setLabel('⏮️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('pause_resume')
+                .setLabel(player.paused ? '▶️' : '⏸️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('stop')
+                .setLabel('⏹️')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId('next')
+                .setLabel('⏭️')
+                .setStyle(ButtonStyle.Primary)
+        );
+
+    if (interaction.message) {
+        await interaction.message.edit({ embeds: [embed], components: [row] });
+    }
+
+    setTimeout(async () => {
+        if (player.playing) {
+            await updateControlPanel(interaction, player);
+        }
+    }, 5000);
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -49,171 +153,85 @@ module.exports = {
                 await player.connect();
             }
 
-            // Sprawdzanie czy to link do Spotify
-            if (query.includes('open.spotify.com')) {
-                const spotifyUrl = new URL(query);
-                const pathParts = spotifyUrl.pathname.split('/');
-                const type = pathParts[1]; // playlist, track, album
-                const id = pathParts[2].split('?')[0];
+            const res = await player.search(query, interaction.user);
 
-                let loadingEmbed = new EmbedBuilder()
-                    .setColor('#FFFF00')
-                    .setTitle('Ładowanie...')
-                    .setDescription('Wczytywanie utworów ze Spotify...');
-                await interaction.editReply({ embeds: [loadingEmbed] });
+            if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
+                const embed = new EmbedBuilder()
+                    .setColor('#FF0000')
+                    .setTitle(t.errors.noMatches)
+                    .setDescription(t.errors.noResultsFound);
+                return interaction.editReply({ embeds: [embed] });
+            }
 
-                let searchQuery = `sp:${type}:${id}`;
-                console.log('Spotify search query:', searchQuery);
-
-                let searchResult = await player.search(searchQuery, interaction.user);
-                
-                if (!searchResult || !searchResult.tracks || searchResult.tracks.length === 0) {
-                    searchQuery = `spsearch:${query}`;
-                    console.log('Trying alternative search:', searchQuery);
-                    searchResult = await player.search(searchQuery, interaction.user);
-                    
-                    if (!searchResult || !searchResult.tracks || searchResult.tracks.length === 0) {
-                        const errorEmbed = new EmbedBuilder()
-                            .setColor('#FF0000')
-                            .setTitle(t.errors.noMatches)
-                            .setDescription(t.errors.noResultsFound);
-                        return interaction.editReply({ embeds: [errorEmbed] });
-                    }
-                }
-
-                console.log('Found tracks:', searchResult.tracks.length);
-                console.log('Player state before adding tracks:', {
-                    playing: player.playing,
-                    paused: player.paused,
-                    queueSize: player.queue.size
-                });
-
-                // Dodaj wszystkie utwory do kolejki
-                for (const track of searchResult.tracks) {
+            if (res.loadType === 'PLAYLIST_LOADED') {
+                for (const track of res.tracks) {
                     await player.queue.add(track);
                 }
 
-                console.log('Player state after adding tracks:', {
-                    playing: player.playing,
-                    paused: player.paused,
-                    queueSize: player.queue.size
-                });
-
-                // Upewnij się, że odtwarzanie rozpocznie się
                 if (!player.playing) {
-                    try {
-                        await player.play();
-                        console.log('Started playback');
-                    } catch (playError) {
-                        console.error('Error starting playback:', playError);
-                        // Spróbuj ponownie rozpocząć odtwarzanie po krótkim opóźnieniu
-                        setTimeout(async () => {
-                            try {
-                                if (!player.playing && player.queue.size > 0) {
-                                    await player.play();
-                                    console.log('Started playback after delay');
-                                }
-                            } catch (retryError) {
-                                console.error('Error on retry:', retryError);
-                            }
-                        }, 1000);
-                    }
+                    await player.play();
                 }
 
-                const successEmbed = new EmbedBuilder()
+                const embed = new EmbedBuilder()
                     .setColor('#00FF00')
                     .setTitle(t.success.playlistAdded)
-                    .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', searchResult.tracks.length)}: **${searchResult.playlistInfo?.name || 'Spotify Track'}**`);
+                    .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
 
-                return interaction.editReply({ embeds: [successEmbed] });
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    await message.delete();
+                    sendControlPanel(interaction, player);
+                }, 5000);
             } else {
-                // Standardowe wyszukiwanie dla nie-Spotify linków
-                let searchQuery = query;
-                if (query.includes('youtube.com') || query.includes('youtu.be')) {
-                    searchQuery = `ytsearch:${query}`;
+                const track = res.tracks[0];
+                await player.queue.add(track);
+
+                if (!player.playing) {
+                    await player.play();
                 }
 
-                const res = await player.search(searchQuery, interaction.user);
+                const embed = new EmbedBuilder()
+                    .setColor('#00FF00')
+                    .setTitle(t.success.trackAdded)
+                    .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
 
-                if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
-                    const embed = new EmbedBuilder()
-                        .setColor('#FF0000')
-                        .setTitle(t.errors.noMatches)
-                        .setDescription(t.errors.noResultsFound);
-                    return interaction.editReply({ embeds: [embed] });
-                }
-
-                if (res.loadType === 'PLAYLIST_LOADED') {
-                    for (const track of res.tracks) {
-                        await player.queue.add(track);
-                    }
-                    
-                    console.log('Player state before playing playlist:', {
-                        playing: player.playing,
-                        paused: player.paused,
-                        queueSize: player.queue.size
-                    });
-
-                    if (!player.playing) {
-                        try {
-                            await player.play();
-                            console.log('Started playlist playback');
-                        } catch (playError) {
-                            console.error('Error starting playlist playback:', playError);
-                            setTimeout(async () => {
-                                if (!player.playing && player.queue.size > 0) {
-                                    await player.play();
-                                }
-                            }, 1000);
-                        }
-                    }
-
-                    const embed = new EmbedBuilder()
-                        .setColor('#00FF00')
-                        .setTitle(t.success.playlistAdded)
-                        .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
-                    
-                    return interaction.editReply({ embeds: [embed] });
-                } else {
-                    const track = res.tracks[0];
-                    if (!track) {
-                        const errorEmbed = new EmbedBuilder()
-                            .setColor('#FF0000')
-                            .setTitle(t.errors.playCommandError)
-                            .setDescription(t.errors.genericError);
-                        return interaction.editReply({ embeds: [errorEmbed] });
-                    }
-                    
-                    await player.queue.add(track);
-                    
-                    console.log('Player state before playing single track:', {
-                        playing: player.playing,
-                        paused: player.paused,
-                        queueSize: player.queue.size
-                    });
-
-                    if (!player.playing) {
-                        try {
-                            await player.play();
-                            console.log('Started single track playback');
-                        } catch (playError) {
-                            console.error('Error starting single track playback:', playError);
-                            setTimeout(async () => {
-                                if (!player.playing && player.queue.size > 0) {
-                                    await player.play();
-                                }
-                            }, 1000);
-                        }
-                    }
-
-                    const embed = new EmbedBuilder()
-                        .setColor('#00FF00')
-                        .setTitle(t.success.trackAdded)
-                        .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
-                    
-                    return interaction.editReply({ embeds: [embed] });
-                }
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    await message.delete();
+                    sendControlPanel(interaction, player);
+                }, 5000);
             }
+
+            // Add button interaction listeners
+            const collector = interaction.channel.createMessageComponentCollector();
+            collector.on('collect', async i => {
+                if (i.customId === 'previous') {
+                    await player.queue.previous();
+                } else if (i.customId === 'pause_resume') {
+                    if (player.paused) {
+                        player.pause(false);
+                        i.component.setLabel('⏸️');
+                    } else {
+                        player.pause(true);
+                        i.component.setLabel('▶️');
+                    }
+                } else if (i.customId === 'stop') {
+                    player.stop();
+                } else if (i.customId === 'next') {
+                    await player.queue.next();
+                }
+                await i.update({ components: [i.message.components[0]] });
+            });
+
+            // Listen for track end to update panel
+            player.on('end', async () => {
+                if (player.queue.size > 0) {
+                    await updateControlPanel(interaction, player);
+                } else {
+                    await interaction.message.delete();
+                }
+            });
+
         } catch (error) {
             console.error('Error in play command:', error);
             const embed = new EmbedBuilder()
