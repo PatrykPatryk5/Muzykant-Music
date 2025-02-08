@@ -16,6 +16,10 @@
   },
   "scripts": {
     "start": "node shard.js",
-    "deploy": "node deploy-commands.js"
+    "deploy": "node deploy-commands.js",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
   }
 }
