@@ -20,7 +20,31 @@ function progressBar(current, total, size = 20) {
     return `${filledBar}${emptyBar} ${percent}%`;
 }
 
+async function createControlRow(player) {
+    return new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('previous')
+                .setEmoji('⏮️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('pause_resume')
+                .setEmoji(player.paused ? '▶️' : '⏸️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('stop')
+                .setEmoji('⏹️')
+                .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId('next')
+                .setEmoji('⏭️')
+                .setStyle(ButtonStyle.Primary)
+        );
+}
+
 async function sendControlPanel(interaction, player) {
+    if (!player.queue.current) return;
+
     const track = player.queue.current;
     const position = player.position;
     const duration = track.info.length || track.info.duration || 0;
@@ -34,37 +58,18 @@ async function sendControlPanel(interaction, player) {
         .setTitle('Odtwarzanie')
         .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
 
-    const row = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId('previous')
-                .setLabel('⏮️')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('pause_resume')
-                .setLabel(player.paused ? '▶️' : '⏸️')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('stop')
-                .setLabel('⏹️')
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setCustomId('next')
-                .setLabel('⏭️')
-                .setStyle(ButtonStyle.Primary)
-        );
-
+    const row = await createControlRow(player);
     const message = await interaction.channel.send({ embeds: [embed], components: [row] });
     interaction.message = message;
 
-    setTimeout(async () => {
-        if (player.playing) {
-            await updateControlPanel(interaction, player);
-        }
-    }, 5000);
+    if (player.playing) {
+        setTimeout(() => updateControlPanel(interaction, player), 5000);
+    }
 }
 
 async function updateControlPanel(interaction, player) {
+    if (!player.queue.current || !interaction.message) return;
+
     const track = player.queue.current;
     const position = player.position;
     const duration = track.info.length || track.info.duration || 0;
@@ -78,35 +83,17 @@ async function updateControlPanel(interaction, player) {
         .setTitle('Odtwarzanie')
         .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
 
-    const row = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId('previous')
-                .setLabel('⏮️')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('pause_resume')
-                .setLabel(player.paused ? '▶️' : '⏸️')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('stop')
-                .setLabel('⏹️')
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setCustomId('next')
-                .setLabel('⏭️')
-                .setStyle(ButtonStyle.Primary)
-        );
+    const row = await createControlRow(player);
 
-    if (interaction.message) {
+    try {
         await interaction.message.edit({ embeds: [embed], components: [row] });
-    }
-
-    setTimeout(async () => {
+        
         if (player.playing) {
-            await updateControlPanel(interaction, player);
+            setTimeout(() => updateControlPanel(interaction, player), 5000);
         }
-    }, 5000);
+    } catch (error) {
+        console.error('Error updating control panel:', error);
+    }
 }
 
 module.exports = {
@@ -165,7 +152,7 @@ module.exports = {
 
             if (res.loadType === 'PLAYLIST_LOADED') {
                 for (const track of res.tracks) {
-                    await player.queue.add(track);
+                    player.queue.add(track);
                 }
 
                 if (!player.playing) {
@@ -179,12 +166,16 @@ module.exports = {
 
                 const message = await interaction.editReply({ embeds: [embed] });
                 setTimeout(async () => {
-                    await message.delete();
-                    sendControlPanel(interaction, player);
+                    try {
+                        await message.delete();
+                        await sendControlPanel(interaction, player);
+                    } catch (error) {
+                        console.error('Error handling playlist message:', error);
+                    }
                 }, 5000);
             } else {
                 const track = res.tracks[0];
-                await player.queue.add(track);
+                player.queue.add(track);
 
                 if (!player.playing) {
                     await player.play();
@@ -197,38 +188,53 @@ module.exports = {
 
                 const message = await interaction.editReply({ embeds: [embed] });
                 setTimeout(async () => {
-                    await message.delete();
-                    sendControlPanel(interaction, player);
+                    try {
+                        await message.delete();
+                        await sendControlPanel(interaction, player);
+                    } catch (error) {
+                        console.error('Error handling track message:', error);
+                    }
                 }, 5000);
             }
 
             // Add button interaction listeners
             const collector = interaction.channel.createMessageComponentCollector();
             collector.on('collect', async i => {
-                if (i.customId === 'previous') {
-                    await player.queue.previous();
-                } else if (i.customId === 'pause_resume') {
-                    if (player.paused) {
-                        player.pause(false);
-                        i.component.setLabel('⏸️');
-                    } else {
-                        player.pause(true);
-                        i.component.setLabel('▶️');
+                try {
+                    switch (i.customId) {
+                        case 'previous':
+                            if (player.queue.previous) {
+                                await player.queue.previous();
+                            }
+                            break;
+                        case 'pause_resume':
+                            try {
+                                if (player.paused) {
+                                    await player.pause(false);
+                                } else {
+                                    await player.pause(true);
+                                }
+                            } catch (error) {
+                                console.error('Error toggling pause state:', error);
+                            }
+                            break;
+                        case 'stop':
+                            await player.stop();
+                            if (interaction.message) {
+                                await interaction.message.delete();
+                            }
+                            break;
+                        case 'next':
+                            if (player.queue.next) {
+                                await player.queue.next();
+                            }
+                            break;
                     }
-                } else if (i.customId === 'stop') {
-                    player.stop();
-                } else if (i.customId === 'next') {
-                    await player.queue.next();
-                }
-                await i.update({ components: [i.message.components[0]] });
-            });
-
-            // Listen for track end event using the player's event method
-            player.on('trackEnd', async (oldTrack, newTrack) => {
-                if (newTrack) {
+                    await i.deferUpdate();
                     await updateControlPanel(interaction, player);
-                } else {
-                    await interaction.message.delete();
+                } catch (error) {
+                    console.error('Error handling button interaction:', error);
+                    await i.deferUpdate();
                 }
             });
 
