@@ -25,8 +25,7 @@ jobs:
         cache: 'npm'
     - name: Set up .env file
       run: |
-        if [ -f .env ]; then
-          export $(cat .env | xargs)
-        fi
+        echo "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" >> .env
+        export $(cat .env | xargs)
     - run: npm install
     - run: npm run start
