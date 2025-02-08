@@ -39,6 +39,14 @@ module.exports = {
         if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: t.errors.joinVoiceChannel });
 
         try {
+            if (player.queue.size === 0) {
+                const embed = new EmbedBuilder()
+                    .setColor('#FF0000')
+                    .setTitle(t.errors.noTrackPlaying)
+                    .setDescription(t.errors.notPlaying);
+                return interaction.reply({ embeds: [embed], ephemeral: true });
+            }
+
             player.skip();
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
