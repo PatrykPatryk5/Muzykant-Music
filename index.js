@@ -69,18 +69,18 @@ const nodes = [
 
 // Globalne handler błędów
 process.on('unhandledRejection', error => {
-  logger.error(`Unhandled promise rejection: ${error.message}`);
+  logger.error(`Unhandled promise rejection: ${error.message}`, error);
 });
 
 process.on('uncaughtException', error => {
-  logger.error(`Uncaught exception: ${error.message}`);
+  logger.error(`Uncaught exception: ${error.message}`, error);
 });
 
 // Reconnect logic for Lavalink nodes
 const reconnectNode = (node) => {
   logger.warn(`Attempting to reconnect node ${node.id} in 5 seconds...`);
   setTimeout(() => {
-    node.connect().catch(e => logger.error(`Failed to reconnect node ${node.id}: ${e.message}`));
+    node.connect().catch(e => logger.error(`Failed to reconnect node ${node.id}: ${e.message}`, e));
   }, 5000);
 };
 
@@ -106,7 +106,7 @@ client.once('ready', () => {
 
       // Obsługa zdarzeń node'ów
       client.lavalink.on('nodeError', (node, error) => {
-        logger.error(`Błąd węzła ${node.id}: ${error.message}`);
+        logger.error(`Błąd węzła ${node.id}: ${error.message}`, error);
         reconnectNode(node);
       });
 
@@ -120,7 +120,7 @@ client.once('ready', () => {
       });
 
     })
-    .catch(error => logger.error(`Błąd inicjalizacji Lavalink managera: ${error.message}`));
+    .catch(error => logger.error(`Błąd inicjalizacji Lavalink managera: ${error.message}`, error));
 });
 
 // Obsługa interakcji – komendy slash
@@ -131,7 +131,7 @@ client.on('interactionCreate', async interaction => {
   try {
     await command.execute(interaction);
   } catch (error) {
-    logger.error(`Błąd przy wykonywaniu komendy ${interaction.commandName}: ${error.message}`);
+    logger.error(`Błąd przy wykonywaniu komendy ${interaction.commandName}: ${error.message}`, error);
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply('Wystąpił błąd podczas wykonywania komendy.');
     } else {
@@ -144,7 +144,7 @@ client.on('interactionCreate', async interaction => {
 client.login(process.env.BOT_TOKEN).then(() => {
   logger.info('Klient zalogowany.');
 }).catch(error => {
-  logger.error(`Błąd logowania klienta: ${error.message}`);
+  logger.error(`Błąd logowania klienta: ${error.message}`, error);
   process.exit(1);
 });
 
