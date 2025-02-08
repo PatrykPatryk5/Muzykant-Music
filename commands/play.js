@@ -213,11 +213,9 @@ module.exports = {
                     switch (i.customId) {
                         case 'previous':
                             try {
-                                const previous = player.queue.shiftPrevious();
-                                if (previous) {
-                                    player.queue.unshift(previous);
-                                    await player.play(previous);
-                                }
+                                const previous = await player.queue.previous();
+                                if (!previous) return console.error("No previous track found");
+                                await player.play({ clientTrack: previous });
                             } catch (error) {
                                 console.error('Error playing previous track:', error);
                             }
@@ -235,7 +233,7 @@ module.exports = {
                             break;
                         case 'stop':
                             try {
-                                //player.queue.clear();
+                                player.queue.clear();
                                 player.stop();
                                 player.disconnect();
                             } catch (error) {
