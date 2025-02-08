@@ -30,14 +30,13 @@ Muzykant Music Bot is a Discord bot designed to provide a rich music playing exp
     npm install
     ```
 
-3. Create a `.env` file in the root directory and add your Discord bot token:
+3. Create a `.env` file in the root directory and add your Discord bot token and Lavalink configuration:
     ```env
     BOT_TOKEN=
     CLIENT_ID=
     LAVALINK_HOST=
     LAVALINK_PORT=
     LAVALINK_PASSWORD=
-
     ```
 
 4. Ensure you have a running Lavalink server and configure its connection in your bot configuration.
@@ -51,14 +50,16 @@ Muzykant Music Bot is a Discord bot designed to provide a rich music playing exp
 
 2. The bot should now be online and ready to use in your Discord server.
 
+> **Important:** This script **cannot be used on public bots**—it is intended for use on **private bots only**!
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any changes or improvements.
+Contributions are welcome! Please open an issue or submit a pull request for any changes or improvements.  
+Even the smallest changes are appreciated—don't hesitate to contribute!
 
 ## License
 
-This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. See the LICENSE file for details.
+This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
 
 ## Support
 
