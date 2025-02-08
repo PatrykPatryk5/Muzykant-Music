@@ -1,9 +1,16 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const db = require('../database');
+const fs = require('fs');
 const translations = {
     pl: require('../translations/polish.json'),
     en: require('../translations/english.json')
 };
+
+function logError(error) {
+    const timestamp = new Date().toISOString();
+    const errorMessage = `[${timestamp}] ERROR: ${error.message}\n${error.stack}\n\n`;
+    fs.appendFileSync('error.log', errorMessage, 'utf8');
+}
 
 function parseDuration(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -60,7 +67,7 @@ async function sendControlPanel(interaction, player) {
 
     const row = await createControlRow(player);
     const message = await interaction.channel.send({ embeds: [embed], components: [row] });
-    interaction.message = message;
+    interaction.guild.controlPanelMessage = message;
 
     if (player.playing) {
         setTimeout(() => updateControlPanel(interaction, player), 5000);
@@ -68,7 +75,7 @@ async function sendControlPanel(interaction, player) {
 }
 
 async function updateControlPanel(interaction, player) {
-    if (!player.queue.current || !interaction.message) return;
+    if (!player.queue.current || !interaction.guild.controlPanelMessage) return;
 
     const track = player.queue.current;
     const position = player.position;
@@ -86,13 +93,13 @@ async function updateControlPanel(interaction, player) {
     const row = await createControlRow(player);
 
     try {
-        await interaction.message.edit({ embeds: [embed], components: [row] });
+        await interaction.guild.controlPanelMessage.edit({ embeds: [embed], components: [row] });
         
         if (player.playing) {
             setTimeout(() => updateControlPanel(interaction, player), 5000);
         }
     } catch (error) {
-        console.error('Error updating control panel:', error);
+        logError(error);
     }
 }
 
@@ -129,16 +136,14 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
-        // Check if there is already an active control panel in the server
-        if (interaction.guild.activeControlPanel) {
-            const embed = new EmbedBuilder()
-                .setColor('#FF0000')
-                .setTitle(t.errors.controlPanelActive)
-                .setDescription(t.errors.onlyOneControlPanel);
-            return interaction.editReply({ embeds: [embed] });
+        // Remove existing control panel if it exists
+        if (interaction.guild.controlPanelMessage) {
+            try {
+                await interaction.guild.controlPanelMessage.delete();
+            } catch (error) {
+                logError(error);
+            }
         }
-
-        interaction.guild.activeControlPanel = true;
 
         try {
             const player = lavalink.createPlayer({
@@ -158,7 +163,6 @@ module.exports = {
                     .setColor('#FF0000')
                     .setTitle(t.errors.noMatches)
                     .setDescription(t.errors.noResultsFound);
-                interaction.guild.activeControlPanel = false;
                 return interaction.editReply({ embeds: [embed] });
             }
 
@@ -182,7 +186,7 @@ module.exports = {
                         await message.delete();
                         await sendControlPanel(interaction, player);
                     } catch (error) {
-                        console.error('Error handling playlist message:', error);
+                        logError(error);
                     }
                 }, 5000);
             } else {
@@ -204,7 +208,7 @@ module.exports = {
                         await message.delete();
                         await sendControlPanel(interaction, player);
                     } catch (error) {
-                        console.error('Error handling track message:', error);
+                        logError(error);
                     }
                 }, 5000);
             }
@@ -220,7 +224,7 @@ collector.on('collect', async i => {
                         await player.play({ clientTrack: previous });
                     }
                 } catch (error) {
-                    console.error('Error playing previous track:', error);
+                    logError(error);
                 }
                 break;
             case 'pause_resume':
@@ -231,7 +235,7 @@ collector.on('collect', async i => {
                         await player.resume();
                     }
                 } catch (error) {
-                    console.error('Error toggling pause state:', error);
+                    logError(error);
                 }
                 break;
             case 'stop':
@@ -240,12 +244,11 @@ collector.on('collect', async i => {
                     player.skip();
                     player.disconnect();
                 } catch (error) {
-                    console.error('Error stopping playback:', error);
+                    logError(error);
                 }
                 if (interaction.message) {
                     await interaction.message.delete();
                 }
-                interaction.guild.activeControlPanel = false;
                 break;
             case 'next':
                 try {
@@ -253,7 +256,7 @@ collector.on('collect', async i => {
                         player.skip();
                     }
                 } catch (error) {
-                    console.error('Error skipping track:', error);
+                    logError(error);
                 }
                 break;
         }
@@ -262,18 +265,17 @@ collector.on('collect', async i => {
             await updateControlPanel(interaction, player);
         }
     } catch (error) {
-        console.error('Error handling button interaction:', error);
+        logError(error);
         await i.deferUpdate();
     }
 });
 
         } catch (error) {
-            console.error('Error in play command:', error);
+            logError(error);
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.errors.playCommandError)
                 .setDescription(t.errors.genericError);
-            interaction.guild.activeControlPanel = false;
             return interaction.editReply({ embeds: [embed] });
         }
     },
