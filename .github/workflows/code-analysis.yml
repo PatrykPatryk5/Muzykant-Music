@@ -1,0 +1,30 @@
+name: Code Analysis with CodeQL
+
+on:
+  push:
+    branches:
+      - main  # lub inna gałąź, na którą chcesz analizować kod
+  pull_request:
+    branches:
+      - main  # gałąź, na której analizujesz pull requesty
+
+jobs:
+  analyze:
+    name: Analyze Code with CodeQL
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up CodeQL
+        uses: github/codeql-action/setup-codeql@v2
+
+      - name: Initialize CodeQL database
+        run: codeql database init --language=javascript  # lub inny język, np. python, go
+
+      - name: Perform CodeQL analysis
+        run: codeql analyze --threads 2  # Zwiększ liczbę wątków w zależności od wydajności
+
+      - name: Upload CodeQL results
+        uses: github/codeql-action/upload-results@v2
