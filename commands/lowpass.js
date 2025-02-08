@@ -39,10 +39,16 @@ module.exports = {
         if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: t.errors.joinVoiceChannel });
 
         try {
+           // console.log('Filters before toggle:', player.filterManager.filters);
+
             await player.filterManager.toggleLowPass();
+
+            //console.log('Filters after toggle:', player.filterManager.filters);
+
+            const isLowPassEnabled = player.filterManager.filters.lowPass;
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
-                .setTitle(player.filterManager.filters.lowpass ? t.success.lowpassEnabled : t.success.lowpassDisabled);
+                .setTitle(isLowPassEnabled ? t.success.lowpassEnabled : t.success.lowpassDisabled);
             return interaction.reply({ embeds: [embed] });
         } catch (error) {
             console.error('Error in lowpass command:', error);
