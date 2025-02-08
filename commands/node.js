@@ -13,6 +13,11 @@ module.exports = {
         const userLang = db.prepare('SELECT language FROM user_preferences WHERE user_id = ?').get(interaction.user.id)?.language || 'pl';
         const t = translations[userLang];
 
+        if (!t || !t.nodeCommand) {
+            console.error('Translations for nodeCommand are not defined');
+            return interaction.reply({ content: 'Translation error', ephemeral: true });
+        }
+
         const guildId = interaction.guildId;
         if (!guildId) return;
 
@@ -23,32 +28,28 @@ module.exports = {
             console.error('Lavalink client is not defined');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(t.nodeCommand.nodeError)
-                .setDescription(t.nodeCommand.noNodeFound);
+                .setTitle(t.nodeCommand.nodeError || 'Node Error')
+                .setDescription(t.nodeCommand.noNodeFound || 'No node found');
             return interaction.editReply({ embeds: [embed] });
         }
-
-        console.log('Lavalink client options:', lavalink.options);
 
         const nodeManager = lavalink.nodeManager;
         if (!nodeManager) {
             console.error('Node manager is not defined in Lavalink client');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(t.nodeCommand.nodeError)
-                .setDescription(t.nodeCommand.noNodeFound);
+                .setTitle(t.nodeCommand.nodeError || 'Node Error')
+                .setDescription(t.nodeCommand.noNodeFound || 'No node found');
             return interaction.editReply({ embeds: [embed] });
         }
-
-        console.log('Node manager nodes:', nodeManager.nodes);
 
         const nodes = nodeManager.nodes;
         if (!nodes || nodes.size === 0) {
             console.error('No nodes found in NodeManager');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(t.nodeCommand.nodeError)
-                .setDescription(t.nodeCommand.noNodeFound);
+                .setTitle(t.nodeCommand.nodeError || 'Node Error')
+                .setDescription(t.nodeCommand.noNodeFound || 'No node found');
             return interaction.editReply({ embeds: [embed] });
         }
 
@@ -57,32 +58,32 @@ module.exports = {
             console.error('No node found in NodeManager');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(t.nodeCommand.nodeError)
-                .setDescription(t.nodeCommand.noNodeFound);
+                .setTitle(t.nodeCommand.nodeError || 'Node Error')
+                .setDescription(t.nodeCommand.noNodeFound || 'No node found');
             return interaction.editReply({ embeds: [embed] });
         }
 
         try {
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
-                .setTitle(t.nodeCommand.nodeInformation)
+                .setTitle(t.nodeCommand.nodeInformation || 'Node Information')
                 .setDescription(`Node: ${node.options.host}`)
                 .addFields(
-                    { name: t.nodeCommand.status, value: node.connected ? t.nodeCommand.connected : t.nodeCommand.disconnected },
-                    { name: t.nodeCommand.players, value: `${node.stats.players}` },
-                    { name: t.nodeCommand.playingPlayers, value: `${node.stats.playingPlayers}` },
-                    { name: t.nodeCommand.uptime, value: `${Math.floor(node.stats.uptime / 60000)} minutes` },
-                    { name: t.nodeCommand.cpuLoad, value: `${node.stats.cpu.systemLoad.toFixed(2)}%` },
-                    { name: t.nodeCommand.memoryUsage, value: `${(node.stats.memory.used / 1024 / 1024).toFixed(2)} MB` },
-                    { name: t.nodeCommand.frameStats, value: `Sent: ${node.stats.frameStats.sent}, Deficit: ${node.stats.frameStats.deficit}, Nulled: ${node.stats.frameStats.nulled}` }
+                    { name: t.nodeCommand.status || 'Status', value: node.connected ? (t.nodeCommand.connected || 'Connected') : (t.nodeCommand.disconnected || 'Disconnected') },
+                    { name: t.nodeCommand.players || 'Players', value: `${node.stats.players}` },
+                    { name: t.nodeCommand.playingPlayers || 'Playing Players', value: `${node.stats.playingPlayers}` },
+                    { name: t.nodeCommand.uptime || 'Uptime', value: `${Math.floor(node.stats.uptime / 60000)} minutes` },
+                    { name: t.nodeCommand.cpuLoad || 'CPU Load', value: `${node.stats.cpu.systemLoad.toFixed(2)}%` },
+                    { name: t.nodeCommand.memoryUsage || 'Memory Usage', value: `${(node.stats.memory.used / 1024 / 1024).toFixed(2)} MB` },
+                    { name: t.nodeCommand.frameStats || 'Frame Stats', value: `Sent: ${node.stats.frameStats.sent}, Deficit: ${node.stats.frameStats.deficit}, Nulled: ${node.stats.frameStats.nulled}` }
                 );
             return interaction.editReply({ embeds: [embed] });
         } catch (error) {
             console.error(`Error in node command: ${error}`);
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(t.nodeCommand.error)
-                .setDescription(t.nodeCommand.genericError);
+                .setTitle(t.nodeCommand.error || 'Error')
+                .setDescription(t.nodeCommand.genericError || 'An error occurred');
             return interaction.editReply({ embeds: [embed] });
         }
     },
