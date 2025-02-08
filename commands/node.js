@@ -20,6 +20,7 @@ module.exports = {
 
         const lavalink = client.lavalink;
         if (!lavalink) {
+            console.error('Lavalink client is not defined');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.nodeCommand.nodeError)
@@ -27,8 +28,11 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
-        const node = lavalink.nodes.first();
+        console.log('Lavalink client:', lavalink);
+
+        const node = lavalink.nodes?.first();
         if (!node) {
+            console.error('No node found in Lavalink client');
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.nodeCommand.nodeError)
