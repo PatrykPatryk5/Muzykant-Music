@@ -25,7 +25,7 @@ if (!token) {
   process.exit(1);
 }
 
-const manager = new ShardingManager(path.join(__dirname, 'bot.js'), {
+const manager = new ShardingManager(path.join(__dirname, 'index.js'), {
   token: token
 });
 
