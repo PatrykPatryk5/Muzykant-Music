@@ -6,8 +6,8 @@ As of now, the only available version of the project is:
 
 | Version         | Supported          |
 | --------------- | ------------------ |
-| 0.0.1-ALPHA     | :white_check_mark: |
-| < 0.0.1-ALPHA   | :x:                |
+| 0.0.2-ALPHA     | :white_check_mark: |
+| < 0.0.2-ALPHA   | :x:                |
 
 ## Reporting a Vulnerability
 
