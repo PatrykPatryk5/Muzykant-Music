@@ -5,19 +5,11 @@ const translations = {
     en: require('../translations/english.json')
 };
 
-function parseTime(string) {
-    const time = string.match(/(\d+[dhms])/g);
-    if (!time) return 0;
-    let ms = 0;
-    for (const t of time) {
-        const unit = t[t.length - 1];
-        const amount = Number(t.slice(0, -1));
-        if (unit === 'd') ms += amount * 24 * 60 * 60 * 1000;
-        else if (unit === 'h') ms += amount * 60 * 60 * 1000;
-        else if (unit === 'm') ms += amount * 60 * 1000;
-        else if (unit === 's') ms += amount * 1000;
-    }
-    return ms;
+function parseDuration(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 function progressBar(current, total, size = 20) {
@@ -26,13 +18,6 @@ function progressBar(current, total, size = 20) {
     const filledBar = '▓'.repeat(filledSize);
     const emptyBar = '░'.repeat(size - filledSize);
     return `${filledBar}${emptyBar} ${percent}%`;
-}
-
-function formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 module.exports = {
@@ -56,14 +41,14 @@ module.exports = {
         try {
             const track = player.queue.current;
             const position = player.position;
-            const duration = track.info.length;
+            const duration = track.info.length || track.info.duration || 0;
 
             // Generate progress bar
             const progressBarText = progressBar(position, duration);
 
             // Format time
-            const currentTime = formatTime(position);
-            const totalTime = formatTime(duration);
+            const currentTime = parseDuration(position);
+            const totalTime = parseDuration(duration);
 
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
