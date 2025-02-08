@@ -34,6 +34,7 @@
     "languageSet": "Language set to"
   },
   "errors": {
+    "pitchCommandError": "Pitch command error",
     "rateCommandError": "Rate command error",
     "speedCommandError": "Speed command error",
     "8dCommandError": "8D command error",
@@ -78,6 +79,8 @@
     "filtersCommandError": "Error in filters command"
   },
   "success": {
+    "pitchValue": "Pitch value",
+    "pitchSet": "Pitch set to",
     "rateValue": "Rate value",
     "rateSet": "Rate set",
     "speedSet": "Speed set",
