@@ -27,9 +27,9 @@ jobs:
         export $(cat .env | xargs)
         echo "BOT_TOKEN is set to: $BOT_TOKEN"  # Debugging line
     - run: npm install
-    - name: Run bot
+    - name: Run bot in background
       run: |
-        npm run start  # Uruchomienie bota
+        npm run start &  # Uruchomienie bota w tle
         sleep 10  # Czekaj 10 sekund na uruchomienie bota
         # Sprawdzamy, czy pojawiły się błędy w logach
         if grep -q -e "Unhandled promise rejection" -e "error" -e "Exception" -e "fatal" logs.txt; then
