@@ -1,16 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const db = require('../database');
-const fs = require('fs');
 const translations = {
     pl: require('../translations/polish.json'),
     en: require('../translations/english.json')
 };
-
-function logError(error) {
-    const timestamp = new Date().toISOString();
-    const errorMessage = `[${timestamp}] ERROR: ${error.message}\n${error.stack}\n\n`;
-    fs.appendFileSync('error.log', errorMessage, 'utf8');
-}
 
 function parseDuration(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -67,7 +60,7 @@ async function sendControlPanel(interaction, player) {
 
     const row = await createControlRow(player);
     const message = await interaction.channel.send({ embeds: [embed], components: [row] });
-    interaction.guild.controlPanelMessage = message;
+    interaction.message = message;
 
     if (player.playing) {
         setTimeout(() => updateControlPanel(interaction, player), 5000);
@@ -75,7 +68,7 @@ async function sendControlPanel(interaction, player) {
 }
 
 async function updateControlPanel(interaction, player) {
-    if (!player.queue.current || !interaction.guild.controlPanelMessage) return;
+    if (!player.queue.current || !interaction.message) return;
 
     const track = player.queue.current;
     const position = player.position;
@@ -93,13 +86,13 @@ async function updateControlPanel(interaction, player) {
     const row = await createControlRow(player);
 
     try {
-        await interaction.guild.controlPanelMessage.edit({ embeds: [embed], components: [row] });
+        await interaction.message.edit({ embeds: [embed], components: [row] });
         
         if (player.playing) {
             setTimeout(() => updateControlPanel(interaction, player), 5000);
         }
     } catch (error) {
-        logError(error);
+        console.error('Error updating control panel:', error);
     }
 }
 
@@ -134,15 +127,6 @@ module.exports = {
                 .setTitle(t.errors.lavalinkNotInitialized)
                 .setDescription(t.errors.initializationError);
             return interaction.editReply({ embeds: [embed] });
-        }
-
-        // Remove existing control panel if it exists
-        if (interaction.guild.controlPanelMessage) {
-            try {
-                await interaction.guild.controlPanelMessage.delete();
-            } catch (error) {
-                logError(error);
-            }
         }
 
         try {
@@ -186,7 +170,7 @@ module.exports = {
                         await message.delete();
                         await sendControlPanel(interaction, player);
                     } catch (error) {
-                        logError(error);
+                        console.error('Error handling playlist message:', error);
                     }
                 }, 5000);
             } else {
@@ -208,70 +192,55 @@ module.exports = {
                         await message.delete();
                         await sendControlPanel(interaction, player);
                     } catch (error) {
-                        logError(error);
+                        console.error('Error handling track message:', error);
                     }
                 }, 5000);
             }
 
+// Add button interaction listeners
 const collector = interaction.channel.createMessageComponentCollector();
 collector.on('collect', async i => {
     try {
         switch (i.customId) {
             case 'previous':
-                try {
-                    const previous = await player.queue.shiftPrevious();
-                    if (previous) {
-                        await player.play({ clientTrack: previous });
-                    }
-                } catch (error) {
-                    logError(error);
+                if (player.queue.previous) {
+                    await player.queue.previous();
                 }
                 break;
             case 'pause_resume':
                 try {
+                    // Check the current state before attempting to change it
                     if (player.playing && !player.paused) {
-                        await player.pause();
+                        await player.pause(true);
                     } else if (player.paused) {
-                        await player.resume();
+                        await player.resume();  // Use resume() instead of pause(false)
                     }
                 } catch (error) {
-                    logError(error);
+                    console.error('Error toggling pause state:', error);
                 }
                 break;
             case 'stop':
-                try {
-                    player.queue.clear();
-                    player.skip();
-                    player.disconnect();
-                } catch (error) {
-                    logError(error);
-                }
+                await player.stop();
                 if (interaction.message) {
                     await interaction.message.delete();
                 }
                 break;
             case 'next':
-                try {
-                    if (player.queue.size > 0) {
-                        player.skip();
-                    }
-                } catch (error) {
-                    logError(error);
+                if (player.queue.next) {
+                    await player.queue.next();
                 }
                 break;
         }
         await i.deferUpdate();
-        if (player.playing) {
-            await updateControlPanel(interaction, player);
-        }
+        await updateControlPanel(interaction, player);
     } catch (error) {
-        logError(error);
+        console.error('Error handling button interaction:', error);
         await i.deferUpdate();
     }
 });
 
         } catch (error) {
-            logError(error);
+            console.error('Error in play command:', error);
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle(t.errors.playCommandError)
