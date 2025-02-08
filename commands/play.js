@@ -16,7 +16,7 @@ function progressBar(current, total, size = 20) {
     const percent = Math.round((current / total) * 100);
     const filledSize = Math.round((size * current) / total);
     const filledBar = '▓'.repeat(filledSize);
-    const emptyBar = '░'.peat(size - filledSize);
+    const emptyBar = '░'.repeat(size - filledSize);
     return `${filledBar}${emptyBar} ${percent}%`;
 }
 
@@ -81,7 +81,7 @@ async function updateControlPanel(interaction, player) {
 
     const track = player.queue.current;
     const position = player.position;
-    const duration = track.info.length or track.info.duration || 0;
+    const duration = track.info.length || track.info.duration || 0;
 
     const progressBarText = progressBar(position, duration);
     const currentTime = parseDuration(position);
@@ -176,8 +176,8 @@ module.exports = {
                 const message = await interaction.editReply({ embeds: [embed] });
                 setTimeout(async () => {
                     try {
-                        await message.delete();
                         await sendControlPanel(interaction, player);
+                        await message.delete();
                     } catch (error) {
                         console.error('Error handling playlist message:', error);
                     }
@@ -198,8 +198,8 @@ module.exports = {
                 const message = await interaction.editReply({ embeds: [embed] });
                 setTimeout(async () => {
                     try {
-                        await message.delete();
                         await sendControlPanel(interaction, player);
+                        await message.delete();
                     } catch (error) {
                         console.error('Error handling track message:', error);
                     }
