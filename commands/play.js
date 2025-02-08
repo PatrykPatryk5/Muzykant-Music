@@ -59,6 +59,15 @@ async function sendControlPanel(interaction, player) {
         .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
 
     const row = await createControlRow(player);
+
+    if (interaction.message) {
+        try {
+            await interaction.message.delete();
+        } catch (error) {
+            console.error('Error deleting existing control panel message:', error);
+        }
+    }
+
     const message = await interaction.channel.send({ embeds: [embed], components: [row] });
     interaction.message = message;
 
@@ -197,63 +206,63 @@ module.exports = {
                 }, 5000);
             }
 
-// Add button interaction listeners
-const collector = interaction.channel.createMessageComponentCollector();
-collector.on('collect', async i => {
-    try {
-        switch (i.customId) {
-            case 'previous':
+            // Add button interaction listeners
+            const collector = interaction.channel.createMessageComponentCollector();
+            collector.on('collect', async i => {
                 try {
-                    const previous = await player.queue.shiftPrevious();
-                    if (previous) {
-                        await player.play({ clientTrack: previous });
+                    switch (i.customId) {
+                        case 'previous':
+                            try {
+                                const previous = await player.queue.shiftPrevious();
+                                if (previous) {
+                                    await player.play({ clientTrack: previous });
+                                }
+                            } catch (error) {
+                                console.error('Error playing previous track:', error);
+                            }
+                            break;
+                        case 'pause_resume':
+                            try {
+                                if (player.playing && !player.paused) {
+                                    await player.pause();
+                                } else if (player.paused) {
+                                    await player.resume();
+                                }
+                            } catch (error) {
+                                console.error('Error toggling pause state:', error);
+                            }
+                            break;
+                        case 'stop':
+                            try {
+                                player.queue.clear();
+                                player.skip();
+                                player.disconnect();
+                            } catch (error) {
+                                console.error('Error stopping playback:', error);
+                            }
+                            if (interaction.message) {
+                                await interaction.message.delete();
+                            }
+                            break;
+                        case 'next':
+                            try {
+                                if (player.queue.size > 0) {
+                                    player.skip();
+                                }
+                            } catch (error) {
+                                console.error('Error skipping track:', error);
+                            }
+                            break;
+                    }
+                    await i.deferUpdate();
+                    if (player.playing) {
+                        await updateControlPanel(interaction, player);
                     }
                 } catch (error) {
-                    console.error('Error playing previous track:', error);
+                    console.error('Error handling button interaction:', error);
+                    await i.deferUpdate();
                 }
-                break;
-            case 'pause_resume':
-                try {
-                    if (player.playing && !player.paused) {
-                        await player.pause();
-                    } else if (player.paused) {
-                        await player.resume();
-                    }
-                } catch (error) {
-                    console.error('Error toggling pause state:', error);
-                }
-                break;
-            case 'stop':
-                try {
-                    player.queue.clear();
-                    player.skip();
-                    player.disconnect();
-                } catch (error) {
-                    console.error('Error stopping playback:', error);
-                }
-                if (interaction.message) {
-                    await interaction.message.delete();
-                }
-                break;
-            case 'next':
-                try {
-                    if (player.queue.size > 0) {
-                        player.skip();
-                    }
-                } catch (error) {
-                    console.error('Error skipping track:', error);
-                }
-                break;
-        }
-        await i.deferUpdate();
-        if (player.playing) {
-            await updateControlPanel(interaction, player);
-        }
-    } catch (error) {
-        console.error('Error handling button interaction:', error);
-        await i.deferUpdate();
-    }
-});
+            });
 
         } catch (error) {
             console.error('Error in play command:', error);
