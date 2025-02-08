@@ -34,6 +34,7 @@
     "languageSet": "Ustawiono język na"
   },
   "errors": {
+    "speedCommandError": "Błąd komendy prędkości",
     "8dCommandError": "Błąd komendy 8d",
     "voiceChannelRequired": "Wymagany kanał głosowy",
     "joinVoiceChannel": "Musisz być na kanale głosowym, aby odtwarzać muzykę.",
@@ -75,6 +76,8 @@
     "filtersCommandError": "Błąd komendy filters"
   },
   "success": {
+    "speedSet": "Prędkość ustawiona",
+    "speedValue": "Prędkość ustawiona na",
     "8dEnabled": "Efekt 8D został włączony",
     "8dDisabled": "Efekt 8D został wyłączony",
     "trackAdded": "Utwór dodany",
