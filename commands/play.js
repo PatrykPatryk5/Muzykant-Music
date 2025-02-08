@@ -223,9 +223,9 @@ module.exports = {
                 await i.update({ components: [i.message.components[0]] });
             });
 
-            // Listen for track end to update panel
-            player.on('end', async () => {
-                if (player.queue.size > 0) {
+            // Listen for track end event using the player's event method
+            player.on('trackEnd', async (oldTrack, newTrack) => {
+                if (newTrack) {
                     await updateControlPanel(interaction, player);
                 } else {
                     await interaction.message.delete();
