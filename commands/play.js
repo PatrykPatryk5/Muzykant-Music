@@ -177,8 +177,11 @@ module.exports = {
                     .setTitle(t.success.playlistAdded)
                     .setDescription(`${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`);
 
-                await interaction.editReply({ embeds: [embed] });
-                setTimeout(() => sendControlPanel(interaction, player), 5000);
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    await message.delete();
+                    sendControlPanel(interaction, player);
+                }, 5000);
             } else {
                 const track = res.tracks[0];
                 await player.queue.add(track);
@@ -192,8 +195,11 @@ module.exports = {
                     .setTitle(t.success.trackAdded)
                     .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
 
-                await interaction.editReply({ embeds: [embed] });
-                setTimeout(() => sendControlPanel(interaction, player), 5000);
+                const message = await interaction.editReply({ embeds: [embed] });
+                setTimeout(async () => {
+                    await message.delete();
+                    sendControlPanel(interaction, player);
+                }, 5000);
             }
 
             // Add button interaction listeners
@@ -204,15 +210,26 @@ module.exports = {
                 } else if (i.customId === 'pause_resume') {
                     if (player.paused) {
                         player.pause(false);
+                        i.component.setLabel('⏸️');
                     } else {
                         player.pause(true);
+                        i.component.setLabel('▶️');
                     }
                 } else if (i.customId === 'stop') {
                     player.stop();
                 } else if (i.customId === 'next') {
                     await player.queue.next();
                 }
-                await i.deferUpdate();
+                await i.update({ components: [i.message.components[0]] });
+            });
+
+            // Listen for track end to update panel
+            player.on('end', async () => {
+                if (player.queue.size > 0) {
+                    await updateControlPanel(interaction, player);
+                } else {
+                    await interaction.message.delete();
+                }
             });
 
         } catch (error) {
