@@ -28,7 +28,7 @@ module.exports = {
             return interaction.editReply({ embeds: [embed] });
         }
 
-        console.log('Lavalink client:', lavalink);
+        console.log('Lavalink client:', JSON.stringify(lavalink, null, 2));
 
         if (!lavalink.nodes) {
             console.error('Lavalink nodes are not defined');
