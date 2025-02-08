@@ -88,6 +88,8 @@
         "playlistAdded": "Dodano playlistę",
         "addedPlaylistToQueue": "Dodano playlistę z {count} utworami do kolejki",
         "trackAdded": "Dodano utwór",
+        "bassboostSet": "Bassboost ustawiony",
+        "bassboostLevel": "Bassboost ustawiony na {level}",
         "addedToQueue": "Dodano do kolejki"
     },
     "commands": {
@@ -95,10 +97,14 @@
             "description": "Włącz/wyłącz efekt 8D",
             "enabledMessage": "Efekt 8D został {status}"
         },
-        "bassboost": {
-            "description": "Włącz/wyłącz bas boost",
-            "enabledMessage": "Efekt bas boost został {status}"
-        },
+"bassboost": {
+    "description": "Włącz/wyłącz efekt wzmocnienia basów",
+    "enabledMessage": "Efekt wzmocnienia basów został {status}",
+    "invalidValueTitle": "Nieprawidłowa wartość basów",
+    "invalidValueDescription": "Wartość basów musi być pomiędzy 0.5 a 2.0.",
+    "successMessage": "Wzmocnienie basów ustawione na {value}"
+},
+
         "distorsion": {
             "description": "Włącz/wyłącz efekt zniekształcenia",
             "enabledMessage": "Efekt zniekształcenia został {status}"
