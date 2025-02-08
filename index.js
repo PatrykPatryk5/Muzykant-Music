@@ -76,6 +76,14 @@ process.on('uncaughtException', error => {
   logger.error(`Uncaught exception: ${error.message}`);
 });
 
+// Reconnect logic for Lavalink nodes
+const reconnectNode = (node) => {
+  logger.warn(`Attempting to reconnect node ${node.id} in 5 seconds...`);
+  setTimeout(() => {
+    node.connect().catch(e => logger.error(`Failed to reconnect node ${node.id}: ${e.message}`));
+  }, 5000);
+};
+
 // Inicjalizacja menedżera po gotowości klienta
 client.once('ready', () => {
   logger.info(`Zalogowano jako ${client.user.tag}`);
@@ -99,13 +107,12 @@ client.once('ready', () => {
       // Obsługa zdarzeń node'ów
       client.lavalink.on('nodeError', (node, error) => {
         logger.error(`Błąd węzła ${node.id}: ${error.message}`);
+        reconnectNode(node);
       });
 
       client.lavalink.on('nodeDisconnect', (node, reason) => {
-        logger.warn(`Węzeł ${node.id} rozłączony. Powód: ${reason}. Próba ponownego połączenia za 5 sekund...`);
-        setTimeout(() => {
-          node.connect().catch(e => logger.error(`Nie udało się ponownie połączyć węzła ${node.id}: ${e.message}`));
-        }, 5000);
+        logger.warn(`Węzeł ${node.id} rozłączony. Powód: ${reason}`);
+        reconnectNode(node);
       });
 
       client.lavalink.on('nodeConnected', (node) => {

@@ -1,10 +1,11 @@
 {
   "name": "Muzykant Music",
-  "version": "1.0.0",
-  "description": "Bot muzyczny dla Discorda",
+  "version": "0.0.1-ALPHA",
+  "description": "Muzykant Music – bot muzyczny dla Discorda z funkcją odtwarzania utworów i filtrami audio",
   "author": "Patryk",
-  "license": "MIT",
+  "license": "CC BY-NC-SA",
   "dependencies": {
+    "better-sqlite3": "^11.8.1",
     "discord.js": "^14.17.3",
     "dotenv": "^16.4.7",
     "lavalink-client": "^2.4.7",

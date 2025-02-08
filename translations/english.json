@@ -1,14 +1,176 @@
 {
-  "PLAY_SUCCESS": "Enqueued: **{title}**",
-  "NO_RESULTS": "No results found.",
-  "NOT_IN_VOICE": "You must be in a voice channel to play music.",
-  "NO_PLAYER": "No active player found.",
-  "SKIP_SUCCESS": "Skipped the current track.",
-  "PAUSE_SUCCESS": "Paused the track.",
-  "RESUME_SUCCESS": "Resumed the track.",
-  "STOP_SUCCESS": "Stopped playback and cleared the queue.",
-  "QUEUE_EMPTY": "The queue is empty.",
-  "VOLUME_SET": "Volume set to {level}.",
-  "CURRENT_VOLUME": "Current volume is {volume}.",
-  "NOW_PLAYING": "Now playing: {title}"
+    "playCommand": {
+        "description": "Play a track based on a query or link",
+        "queryDescription": "Track name or URL"
+    },
+    "nowPlayingCommand": {
+        "description": "Display the currently playing track",
+        "nowPlaying": "Currently playing track"
+    },
+    "pauseCommand": {
+        "description": "Pause the current track"
+    },
+    "queueCommand": {
+        "description": "Display the current track queue",
+        "currentQueue": "Current queue"
+    },
+    "resumeCommand": {
+        "description": "Resume the current track"
+    },
+    "skipCommand": {
+        "description": "Skip the current track"
+    },
+    "stopCommand": {
+        "description": "Stop playback and clear the queue"
+    },
+    "volumeCommand": {
+        "description": "Set or display the player volume",
+        "currentVolume": "Current volume",
+        "currentVolumeLevel": "Current volume is"
+    },
+    "languageCommand": {
+        "description": "Set the preferred language",
+        "languageOption": "Select language",
+        "languageSet": "Language set to"
+    },
+    "errors": {
+        "voiceChannelRequired": "Voice channel required",
+        "joinVoiceChannel": "You must be in a voice channel to play music.",
+        "lavalinkNotInitialized": "Lavalink not initialized",
+        "initializationError": "Lavalink has not been initialized.",
+        "noMatches": "No matches found",
+        "noResultsFound": "No results found.",
+        "playCommandError": "Error in play command",
+        "nowPlayingCommandError": "Error in nowplaying command",
+        "pauseCommandError": "Error in pause command",
+        "queueCommandError": "Error in queue command",
+        "resumeCommandError": "Error in resume command",
+        "skipCommandError": "Error in skip command",
+        "stopCommandError": "Error in stop command",
+        "volumeCommandError": "Error in volume command",
+        "languageCommandError": "Error in language command",
+        "genericError": "An error occurred while processing the request.",
+        "noTrackPlaying": "No track playing",
+        "notPlaying": "I am not playing any track currently.",
+        "noActivePlayer": "No active player",
+        "noPlayer": "No active player.",
+        "emptyQueue": "Queue is empty",
+        "noTracks": "The queue is empty.",
+        "invalidVolume": "Invalid volume value",
+        "volumeRange": "Volume must be between 1 and 200.",
+        "loadFailed": "Load failed",
+        "couldNotLoad": "Could not load this track or playlist",
+        "voiceChannelRequired": "Voice channel required",
+        "joinVoiceChannel": "You need to join a voice channel first",
+        "playerCreationError": "Player creation error",
+        "playerCreationErrorDesc": "An error occurred while creating the music player",
+        "connectionError": "Connection error",
+        "connectionErrorDesc": "Could not connect to the voice channel",
+        "noResults": "No results",
+        "noResultsFound": "No results found for your search",
+        "playbackError": "Playback error",
+        "playbackErrorDesc": "An error occurred while trying to play the track",
+        "genericError": "Error occurred",
+        "genericErrorDesc": "An unexpected error occurred while processing your request"
+    },
+    "success": {
+        "trackAdded": "Track added",
+        "addedToQueue": "Added to queue",
+        "trackPaused": "Track paused",
+        "paused": "Track has been paused.",
+        "trackResumed": "Track resumed",
+        "resumed": "Playback has been resumed.",
+        "trackSkipped": "Track skipped",
+        "skipped": "Skipped the current track.",
+        "playbackStopped": "Playback stopped",
+        "queueCleared": "Playback stopped and queue cleared.",
+        "volumeSet": "Volume set",
+        "newVolume": "New volume is",
+        "playlistAdded": "Playlist added",
+        "addedPlaylistToQueue": "Added playlist to queue",
+        "trackCount": "Number of tracks",
+        "playlistAdded": "Playlist added",
+        "addedPlaylistToQueue": "Added playlist with {count} tracks to the queue",
+        "trackAdded": "Track added",
+        "addedToQueue": "Added to the queue"
+    },
+    "commands": {
+        "8d": {
+            "description": "Enable/disable 8D audio effect",
+            "enabledMessage": "8D audio effect has been {status}"
+        },
+        "bassboost": {
+            "description": "Enable/disable bass boost effect",
+            "enabledMessage": "Bass boost effect has been {status}"
+        },
+        "distorsion": {
+            "description": "Enable/disable distorsion effect",
+            "enabledMessage": "Distorsion effect has been {status}"
+        },
+        "karaoke": {
+            "description": "Enable/disable karaoke effect",
+            "enabledMessage": "Karaoke effect has been {status}"
+        },
+        "nightcore": {
+            "description": "Enable/disable nightcore effect",
+            "enabledMessage": "Nightcore effect has been {status}"
+        },
+        "pitch": {
+            "description": "Adjust the pitch",
+            "invalidValueTitle": "Invalid Pitch Value",
+            "invalidValueDescription": "Pitch value must be between 0.5 and 2.0.",
+            "successMessage": "Pitch has been set to {value}"
+        },
+        "rate": {
+            "description": "Adjust the rate",
+            "invalidValueTitle": "Invalid Rate Value",
+            "invalidValueDescription": "Rate value must be between 0.5 and 2.0.",
+            "successMessage": "Rate has been set to {value}"
+        },
+        "reset": {
+            "description": "Reset all effects",
+            "successMessage": "All effects have been reset"
+        },
+        "rotation": {
+            "description": "Enable/disable rotation effect",
+            "enabledMessage": "Rotation effect has been {status}"
+        },
+        "speed": {
+            "description": "Adjust the speed",
+            "invalidValueTitle": "Invalid Speed Value",
+            "invalidValueDescription": "Speed value must be between 0.5 and 2.0.",
+            "successMessage": "Speed has been set to {value}"
+        },
+        "tremolo": {
+            "description": "Enable/disable tremolo effect",
+            "enabledMessage": "Tremolo effect has been {status}"
+        },
+        "vibrato": {
+            "description": "Enable/disable vibrato effect",
+            "enabledMessage": "Vibrato effect has been {status}"
+        },
+        "lowpass": {
+            "description": "Enable/disable lowpass effect",
+            "enabledMessage": "Lowpass effect has been {status}"
+        },
+        "node": {
+            "description": "Get information about the node",
+            "connected": "Connected",
+            "disconnected": "Disconnected",
+            "players": "Players",
+            "uptime": "Uptime",
+            "minutes": "minutes"
+        },
+        "ping": {
+            "description": "Get the bot's latency",
+            "latency": "Latency",
+            "apiLatency": "API Latency"
+        },
+        "help": {
+            "title": "Help",
+            "description": "List of available commands:"
+        }
+    },
+    "enabled": "enabled",
+    "disabled": "disabled"
 }

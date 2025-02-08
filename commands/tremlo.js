@@ -7,8 +7,8 @@ const translations = {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('skip')
-        .setDescription('Skip the current track'),
+        .setName('tremolo')
+        .setDescription('Toggle Tremolo filter'),
     async execute(interaction) {
         const userLang = db.prepare('SELECT language FROM user_preferences WHERE user_id = ?').get(interaction.user.id)?.language || 'pl';
         const t = translations[userLang];
@@ -39,16 +39,16 @@ module.exports = {
         if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: t.errors.joinVoiceChannel });
 
         try {
-            player.skip();
+            await player.filterManager.toggleTremolo();
             const embed = new EmbedBuilder()
                 .setColor('#00FF00')
-                .setTitle(t.success.trackSkipped);
+                .setTitle(player.filterManager.filters.tremolo ? t.success.tremoloEnabled : t.success.tremoloDisabled);
             return interaction.reply({ embeds: [embed] });
         } catch (error) {
-            console.error('Error in skip command:', error);
+            console.error('Error in tremolo command:', error);
             const embed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setTitle(t.errors.skipCommandError)
+                .setTitle(t.errors.tremoloCommandError)
                 .setDescription(t.errors.genericError);
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
