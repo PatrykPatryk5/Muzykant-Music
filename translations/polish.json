@@ -34,6 +34,7 @@
         "languageSet": "Ustawiono język na"
     },
     "errors": {
+        "8dCommandError": "Błąd komendy 8d",
         "voiceChannelRequired": "Wymagany kanał głosowy",
         "joinVoiceChannel": "Musisz być na kanale głosowym, aby odtwarzać muzykę.",
         "lavalinkNotInitialized": "Lavalink nie zainicjalizowany",
@@ -74,6 +75,8 @@
         "filtersCommandError": "Błąd komendy filters"
     },
     "success": {
+        "8dEnabled": "Efekt 8D został włączony",
+        "8dDisabled": "Efekt 8D został wyłączony",
         "trackAdded": "Utwór dodany",
         "addedToQueue": "Dodano do kolejki",
         "trackPaused": "Utwór zatrzymany",
