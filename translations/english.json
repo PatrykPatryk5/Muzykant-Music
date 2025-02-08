@@ -122,7 +122,10 @@
         "highPassDisabled": "HighPass filter has been disabled",
         "normalizationEnabled": "Normalization filter has been enabled",
         "normalizationDisabled": "Normalization filter has been disabled",
-        "filterToggle": "Filter Toggle"
+        "filterToggle": "Filter Toggle",
+        "autoplayStatus": "Autoplay status: {status}",
+        "enabled": "enabled",
+        "disabled": "disabled"
     },
     "commands": {
         "8d": {
