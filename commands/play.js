@@ -76,7 +76,7 @@ async function sendControlPanel(interaction, player) {
 
   // Utwórz kolektor dla przycisków przypisanych do tej wiadomości
   const collector = controlMessage.createMessageComponentCollector({
-    time: 600000, // 10 minut
+  //  time: 600000, // 10 minut
   });
 
   collector.on('collect', async (i) => {
