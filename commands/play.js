@@ -43,7 +43,7 @@ async function createControlRow(player) {
     new ButtonBuilder()
       .setCustomId('next')
       .setEmoji('⏭️')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Primary)
   );
 }
 
@@ -62,44 +62,84 @@ async function sendControlPanel(interaction, player) {
     .setColor('#00FF00')
     .setTitle('Odtwarzanie')
     .setDescription(
-      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`,
+      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`
     );
 
   const row = await createControlRow(player);
 
-  // Usuń istniejący panel odtwarzania, jeśli istnieje
-  const existingMessage = interaction.channel.messages.cache.find(
-    (msg) => msg.embeds[0]?.title === 'Odtwarzanie',
-  );
-  if (existingMessage) {
-    try {
-      await existingMessage.delete();
-    } catch (error) {
-      console.error('Error deleting existing control panel message:', error);
-    }
-  }
-
-  if (interaction.message) {
-    try {
-      await interaction.message.delete();
-    } catch (error) {
-      console.error('Error deleting existing control panel message:', error);
-    }
-  }
-
-  const message = await interaction.channel.send({
+  // Wyślij wiadomość z panelem sterowania
+  const controlMessage = await interaction.channel.send({
     embeds: [embed],
     components: [row],
   });
-  interaction.message = message;
+  interaction.controlPanelMessage = controlMessage;
 
+  // Utwórz kolektor dla przycisków przypisanych do tej wiadomości
+  const collector = controlMessage.createMessageComponentCollector({
+  //  time: 600000, // 10 minut
+  });
+
+  collector.on('collect', async (i) => {
+    try {
+      // Opcjonalnie: ogranicz obsługę do osoby, która wywołała komendę
+      if (i.user.id !== interaction.user.id) {
+        return i.reply({ content: 'Nie możesz tego użyć!', ephemeral: true });
+      }
+      switch (i.customId) {
+        case 'previous':
+          try {
+            await playPreviousTrack(player);
+          } catch (error) {
+            console.error('Error playing previous track:', error);
+          }
+          break;
+        case 'pause_resume':
+          try {
+            if (player.playing && !player.paused) {
+              await player.pause();
+            } else if (player.paused) {
+              await player.resume();
+            }
+          } catch (error) {
+            console.error('Error toggling pause state:', error);
+          }
+          break;
+        case 'stop':
+          try {
+            await player.stopPlaying(true, false);
+          } catch (error) {
+            console.error('Error stopping playback:', error);
+          }
+          try {
+            await controlMessage.delete();
+          } catch (error) {}
+          collector.stop();
+          return;
+        case 'next':
+          try {
+            player.skip();
+          } catch (error) {
+            console.error('Error skipping track:', error);
+          }
+          break;
+      }
+      await i.deferUpdate();
+      // Aktualizuj panel sterowania po każdej interakcji
+      updateControlPanel(interaction, player);
+    } catch (error) {
+      console.error('Error handling button interaction:', error);
+      await i.deferUpdate();
+    }
+  });
+
+  // Automatyczna aktualizacja panelu co 10 sekund, jeśli utwór nadal gra
   if (player.playing) {
     setTimeout(() => updateControlPanel(interaction, player), 10000);
   }
 }
 
 async function updateControlPanel(interaction, player) {
-  if (!player.queue.current || !interaction.message) return;
+  if (!player.queue.current || !interaction.controlPanelMessage) return;
 
   const track = player.queue.current;
   const position = player.position;
@@ -113,29 +153,18 @@ async function updateControlPanel(interaction, player) {
     .setColor('#00FF00')
     .setTitle('Odtwarzanie')
     .setDescription(
-      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`,
+      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`
     );
 
   const row = await createControlRow(player);
 
   try {
-    if (!interaction.message) {
-      console.error('Message not found for updating control panel.');
-      return;
-    }
-    await interaction.message.edit({ embeds: [embed], components: [row] });
-
-    if (player.playing) {
-      setTimeout(() => updateControlPanel(interaction, player), 10000);
-    }
+    await interaction.controlPanelMessage.edit({
+      embeds: [embed],
+      components: [row],
+    });
   } catch (error) {
-    if (error.code === 10008) {
-      console.error(
-        'Error updating control panel: Message not found or already deleted.',
-      );
-    } else {
-      console.error('Error updating control panel:', error);
-    }
+    console.error('Error updating control panel:', error);
   }
 }
 
@@ -152,14 +181,12 @@ async function playPreviousTrack(player) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('play')
-    .setDescription(
-      'Odtwórz utwór lub playlistę na podstawie zapytania lub linku',
-    )
+    .setDescription('Odtwórz utwór lub playlistę na podstawie zapytania lub linku')
     .addStringOption((option) =>
       option
         .setName('query')
         .setDescription('Nazwa utworu, URL lub URL playlisty')
-        .setRequired(true),
+        .setRequired(true)
     ),
   async execute(interaction) {
     const userLang =
@@ -203,11 +230,7 @@ module.exports = {
 
       const res = await player.search(query, interaction.user);
 
-      if (
-        res.loadType === 'NO_MATCHES' ||
-        !res.tracks ||
-        res.tracks.length === 0
-      ) {
+      if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
         const embed = new EmbedBuilder()
           .setColor('#FF0000')
           .setTitle(t.errors.noMatches)
@@ -215,25 +238,20 @@ module.exports = {
         return interaction.editReply({ embeds: [embed] });
       }
 
-      if (res.loadType === 'PLAYLIST_LOADED') {
+      // Jeśli wynik posiada playlistInfo lub zapytanie zawiera "list=" i zwrócono więcej niż 1 utwór – traktuj to jako playlistę
+      if (res.playlistInfo || (query.includes('list=') && res.tracks.length > 1)) {
         for (const track of res.tracks) {
           player.queue.add(track);
         }
-
         if (!player.playing) {
           await player.play();
         }
-
         const embed = new EmbedBuilder()
           .setColor('#00FF00')
           .setTitle(t.success.playlistAdded)
           .setDescription(
-            `${t.success.addedPlaylistToQueue.replace(
-              '{count}',
-              res.tracks.length,
-            )}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`,
+            `${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`
           );
-
         const message = await interaction.editReply({ embeds: [embed] });
         setTimeout(async () => {
           try {
@@ -244,22 +262,16 @@ module.exports = {
           }
         }, 5000);
       } else {
+        // Pojedynczy utwór
         const track = res.tracks[0];
         player.queue.add(track);
-
         if (!player.playing) {
           await player.play();
         }
-
         const embed = new EmbedBuilder()
           .setColor('#00FF00')
           .setTitle(t.success.trackAdded)
-          .setDescription(
-            `${t.success.addedToQueue}: **${
-              track.info?.title || 'Unknown Title'
-            }**`,
-          );
-
+          .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
         const message = await interaction.editReply({ embeds: [embed] });
         setTimeout(async () => {
           try {
@@ -271,57 +283,7 @@ module.exports = {
         }, 5000);
       }
 
-      // Add button interaction listeners
-      const collector = interaction.channel.createMessageComponentCollector();
-      collector.on('collect', async (i) => {
-        try {
-          switch (i.customId) {
-            case 'previous':
-              try {
-                await playPreviousTrack(player);
-              } catch (error) {
-                console.error('Error playing previous track:', error);
-              }
-              break;
-            case 'pause_resume':
-              try {
-                if (player.playing && !player.paused) {
-                  await player.pause();
-                } else if (player.paused) {
-                  await player.resume();
-                }
-              } catch (error) {
-                console.error('Error toggling pause state:', error);
-              }
-              break;
-            case 'stop':
-              try {
-                await player.stopPlaying(true, false);
-              } catch (error) {
-                console.error('Error stopping playback:', error);
-              }
-              if (interaction.message) {
-                await interaction.message.delete();
-              }
-              break;
-            case 'next':
-              try {
-                player.skip();
-              } catch (error) {
-                console.error('Error skipping track:', error);
-              }
-              break;
-          }
-          await i.deferUpdate();
-          if (player.playing) {
-            await updateControlPanel(interaction, player);
-          }
-        } catch (error) {
-          console.error('Error handling button interaction:', error);
-          await i.deferUpdate();
-        }
-      });
-
+      // Na starcie utworu dodajemy aktualny utwór do historii
       lavalink.on('trackStart', (player, track) => {
         if (player.queue.current) {
           player.history.push(player.queue.current);
