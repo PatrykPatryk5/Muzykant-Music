@@ -43,7 +43,7 @@ async function createControlRow(player) {
     new ButtonBuilder()
       .setCustomId('next')
       .setEmoji('⏭️')
-      .setStyle(ButtonStyle.Primary),
+      .setStyle(ButtonStyle.Primary)
   );
 }
 
@@ -62,28 +62,17 @@ async function sendControlPanel(interaction, player) {
     .setColor('#00FF00')
     .setTitle('Odtwarzanie')
     .setDescription(
-      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`,
+      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`
     );
 
   const row = await createControlRow(player);
 
-  // Usuń istniejący panel odtwarzania, jeśli istnieje
-  const existingMessage = interaction.channel.messages.cache.find(
-    (msg) => msg.embeds[0]?.title === 'Odtwarzanie',
-  );
-  if (existingMessage) {
+  // Jeśli istnieje poprzednia wiadomość panelu sterowania – usuń ją
+  if (interaction.controlPanelMessage) {
     try {
-      await existingMessage.delete();
+      await interaction.controlPanelMessage.delete();
     } catch (error) {
-      console.error('Error deleting existing control panel message:', error);
-    }
-  }
-
-  if (interaction.message) {
-    try {
-      await interaction.message.delete();
-    } catch (error) {
-      console.error('Error deleting existing control panel message:', error);
+      // Jeśli wiadomość została już usunięta, nie rób nic
     }
   }
 
@@ -91,7 +80,7 @@ async function sendControlPanel(interaction, player) {
     embeds: [embed],
     components: [row],
   });
-  interaction.message = message;
+  interaction.controlPanelMessage = message;
 
   if (player.playing) {
     setTimeout(() => updateControlPanel(interaction, player), 10000);
@@ -99,7 +88,7 @@ async function sendControlPanel(interaction, player) {
 }
 
 async function updateControlPanel(interaction, player) {
-  if (!player.queue.current || !interaction.message) return;
+  if (!player.queue.current || !interaction.controlPanelMessage) return;
 
   const track = player.queue.current;
   const position = player.position;
@@ -113,26 +102,27 @@ async function updateControlPanel(interaction, player) {
     .setColor('#00FF00')
     .setTitle('Odtwarzanie')
     .setDescription(
-      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`,
+      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`
     );
 
   const row = await createControlRow(player);
 
   try {
-    if (!interaction.message) {
-      console.error('Message not found for updating control panel.');
+    // Pobierz ponownie wiadomość, żeby upewnić się, że jeszcze istnieje
+    const msg = await interaction.channel.messages.fetch(interaction.controlPanelMessage.id);
+    if (!msg) {
+      interaction.controlPanelMessage = null;
       return;
     }
-    await interaction.message.edit({ embeds: [embed], components: [row] });
+    await msg.edit({ embeds: [embed], components: [row] });
 
     if (player.playing) {
       setTimeout(() => updateControlPanel(interaction, player), 10000);
     }
   } catch (error) {
     if (error.code === 10008) {
-      console.error(
-        'Error updating control panel: Message not found or already deleted.',
-      );
+      // Wiadomość nie została odnaleziona – zatrzymaj aktualizacje
+      interaction.controlPanelMessage = null;
     } else {
       console.error('Error updating control panel:', error);
     }
@@ -152,14 +142,12 @@ async function playPreviousTrack(player) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('play')
-    .setDescription(
-      'Odtwórz utwór lub playlistę na podstawie zapytania lub linku',
-    )
+    .setDescription('Odtwórz utwór lub playlistę na podstawie zapytania lub linku')
     .addStringOption((option) =>
       option
         .setName('query')
         .setDescription('Nazwa utworu, URL lub URL playlisty')
-        .setRequired(true),
+        .setRequired(true)
     ),
   async execute(interaction) {
     const userLang =
@@ -203,11 +191,7 @@ module.exports = {
 
       const res = await player.search(query, interaction.user);
 
-      if (
-        res.loadType === 'NO_MATCHES' ||
-        !res.tracks ||
-        res.tracks.length === 0
-      ) {
+      if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
         const embed = new EmbedBuilder()
           .setColor('#FF0000')
           .setTitle(t.errors.noMatches)
@@ -216,9 +200,14 @@ module.exports = {
       }
 
       if (res.loadType === 'PLAYLIST_LOADED') {
+        // Dodaj wszystkie utwory z playlisty
         for (const track of res.tracks) {
           player.queue.add(track);
         }
+
+        // Poprawna liczba utworów – z uwzględnieniem liczby pojedynczej/mnogiej
+        const trackCount = res.tracks.length;
+        const trackCountText = trackCount === 1 ? `${trackCount} piosenka` : `${trackCount} piosenek`;
 
         if (!player.playing) {
           await player.play();
@@ -228,10 +217,7 @@ module.exports = {
           .setColor('#00FF00')
           .setTitle(t.success.playlistAdded)
           .setDescription(
-            `${t.success.addedPlaylistToQueue.replace(
-              '{count}',
-              res.tracks.length,
-            )}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`,
+            `${t.success.addedPlaylistToQueue.replace('{count}', trackCountText)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`
           );
 
         const message = await interaction.editReply({ embeds: [embed] });
@@ -254,11 +240,7 @@ module.exports = {
         const embed = new EmbedBuilder()
           .setColor('#00FF00')
           .setTitle(t.success.trackAdded)
-          .setDescription(
-            `${t.success.addedToQueue}: **${
-              track.info?.title || 'Unknown Title'
-            }**`,
-          );
+          .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
 
         const message = await interaction.editReply({ embeds: [embed] });
         setTimeout(async () => {
@@ -271,7 +253,7 @@ module.exports = {
         }, 5000);
       }
 
-      // Add button interaction listeners
+      // Obsługa przycisków
       const collector = interaction.channel.createMessageComponentCollector();
       collector.on('collect', async (i) => {
         try {
@@ -300,8 +282,9 @@ module.exports = {
               } catch (error) {
                 console.error('Error stopping playback:', error);
               }
-              if (interaction.message) {
-                await interaction.message.delete();
+              if (interaction.controlPanelMessage) {
+                await interaction.controlPanelMessage.delete();
+                interaction.controlPanelMessage = null;
               }
               break;
             case 'next':
