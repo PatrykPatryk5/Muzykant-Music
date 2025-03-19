@@ -5,7 +5,7 @@
   "author": "Patryk",
   "license": "CC BY-NC-SA",
   "dependencies": {
-    "better-sqlite3": "^11.8.1",
+    "better-sqlite3": "^11.9.1",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "lavalink-client": "^2.5.0",
