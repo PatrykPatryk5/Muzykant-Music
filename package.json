@@ -9,7 +9,7 @@
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "lavalink-client": "^2.5.0",
-    "discord-hybrid-sharding": "^2.2.5",
+    "discord-hybrid-sharding": "^2.2.6",
     "winston": "^3.17.0"
   },
   "engines": {
