@@ -53,7 +53,6 @@ async function sendControlPanel(interaction, player) {
   const track = player.queue.current;
   const position = player.position;
   const duration = track.info.length || track.info.duration || 0;
-
   const progressBarText = progressBar(position, duration);
   const currentTime = parseDuration(position);
   const totalTime = parseDuration(duration);
@@ -61,80 +60,81 @@ async function sendControlPanel(interaction, player) {
   const embed = new EmbedBuilder()
     .setColor('#00FF00')
     .setTitle('Odtwarzanie')
-    .setDescription(
-      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`
-    );
+    .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
 
   const row = await createControlRow(player);
 
-  // Wyślij wiadomość z panelem sterowania
-  const controlMessage = await interaction.channel.send({
-    embeds: [embed],
-    components: [row],
-  });
-  interaction.controlPanelMessage = controlMessage;
+  try {
+    const controlMessage = await interaction.channel.send({
+      embeds: [embed],
+      components: [row],
+    });
+    interaction.controlPanelMessage = controlMessage;
 
-  // Utwórz kolektor dla przycisków przypisanych do tej wiadomości
-  const collector = controlMessage.createMessageComponentCollector({
-  //  time: 600000, // 10 minut
-  });
+    const collector = controlMessage.createMessageComponentCollector({
+      // Możesz odkomentować linię poniżej, aby ustawić limit czasowy na zbieranie reakcji (np. 10 minut)
+      // time: 600000,
+    });
 
-  collector.on('collect', async (i) => {
-    try {
-      // Opcjonalnie: ogranicz obsługę do osoby, która wywołała komendę
-      if (i.user.id !== interaction.user.id) {
-        return i.reply({ content: 'Nie możesz tego użyć!', ephemeral: true });
-      }
-      switch (i.customId) {
-        case 'previous':
-          try {
-            await playPreviousTrack(player);
-          } catch (error) {
-            console.error('Error playing previous track:', error);
-          }
-          break;
-        case 'pause_resume':
-          try {
-            if (player.playing && !player.paused) {
-              await player.pause();
-            } else if (player.paused) {
-              await player.resume();
+    collector.on('collect', async (i) => {
+      try {
+        if (i.user.id !== interaction.user.id) {
+          return i.reply({ content: 'Nie możesz tego użyć!', ephemeral: true });
+        }
+        switch (i.customId) {
+          case 'previous':
+            try {
+              await playPreviousTrack(player);
+            } catch (error) {
+              console.error('Error playing previous track:', error);
             }
-          } catch (error) {
-            console.error('Error toggling pause state:', error);
-          }
-          break;
-        case 'stop':
-          try {
-            await player.stopPlaying(true, false);
-          } catch (error) {
-            console.error('Error stopping playback:', error);
-          }
-          try {
-            await controlMessage.delete();
-          } catch (error) {}
-          collector.stop();
-          return;
-        case 'next':
-          try {
-            player.skip();
-          } catch (error) {
-            console.error('Error skipping track:', error);
-          }
-          break;
+            break;
+          case 'pause_resume':
+            try {
+              if (player.playing && !player.paused) {
+                await player.pause();
+              } else if (player.paused) {
+                await player.resume();
+              }
+            } catch (error) {
+              console.error('Error toggling pause state:', error);
+            }
+            break;
+          case 'stop':
+            try {
+              await player.stopPlaying(true, false);
+            } catch (error) {
+              console.error('Error stopping playback:', error);
+            }
+            try {
+              await controlMessage.delete();
+            } catch (error) {
+              console.error('Error deleting control panel message:', error);
+            }
+            collector.stop();
+            return;
+          case 'next':
+            try {
+              player.skip();
+            } catch (error) {
+              console.error('Error skipping track:', error);
+            }
+            break;
+        }
+        await i.deferUpdate();
+        updateControlPanel(interaction, player);
+      } catch (error) {
+        console.error('Error handling button interaction:', error);
+        await i.deferUpdate();
       }
-      await i.deferUpdate();
-      // Aktualizuj panel sterowania po każdej interakcji
-      updateControlPanel(interaction, player);
-    } catch (error) {
-      console.error('Error handling button interaction:', error);
-      await i.deferUpdate();
-    }
-  });
+    });
 
-  // Automatyczna aktualizacja panelu co 10 sekund, jeśli utwór nadal gra
-  if (player.playing) {
-    setTimeout(() => updateControlPanel(interaction, player), 10000);
+    // Automatyczna aktualizacja panelu co 10 sekund, jeśli utwór nadal gra
+    if (player.playing) {
+      setTimeout(() => updateControlPanel(interaction, player), 10000);
+    }
+  } catch (error) {
+    console.error('Error sending control panel:', error);
   }
 }
 
@@ -144,7 +144,6 @@ async function updateControlPanel(interaction, player) {
   const track = player.queue.current;
   const position = player.position;
   const duration = track.info.length || track.info.duration || 0;
-
   const progressBarText = progressBar(position, duration);
   const currentTime = parseDuration(position);
   const totalTime = parseDuration(duration);
@@ -152,9 +151,7 @@ async function updateControlPanel(interaction, player) {
   const embed = new EmbedBuilder()
     .setColor('#00FF00')
     .setTitle('Odtwarzanie')
-    .setDescription(
-      `**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`
-    );
+    .setDescription(`**${track.info.title}**\n\n${progressBarText}\n\n${currentTime} - ${totalTime}`);
 
   const row = await createControlRow(player);
 
@@ -190,8 +187,7 @@ module.exports = {
     ),
   async execute(interaction) {
     const userLang =
-      db
-        .prepare('SELECT language FROM user_preferences WHERE user_id = ?')
+      db.prepare('SELECT language FROM user_preferences WHERE user_id = ?')
         .get(interaction.user.id)?.language || 'pl';
     const t = translations[userLang];
     const query = interaction.options.getString('query');
@@ -238,10 +234,19 @@ module.exports = {
         return interaction.editReply({ embeds: [embed] });
       }
 
-      // Jeśli wynik posiada playlistInfo lub zapytanie zawiera "list=" i zwrócono więcej niż 1 utwór – traktuj to jako playlistę
+      // Obsługa playlisty: sprawdzamy, czy wynik posiada playlistInfo lub zapytanie zawiera "list=" oraz zwrócono więcej niż 1 utwór.
       if (res.playlistInfo || (query.includes('list=') && res.tracks.length > 1)) {
-        for (const track of res.tracks) {
-          player.queue.add(track);
+        try {
+          for (const track of res.tracks) {
+            await player.queue.add(track);
+          }
+        } catch (error) {
+          console.error('Error adding tracks from playlist:', error);
+          const errorEmbed = new EmbedBuilder()
+            .setColor('#FF0000')
+            .setTitle(t.errors.playlistAdditionError || 'Błąd dodawania playlisty')
+            .setDescription('Wystąpił błąd podczas dodawania utworów z playlisty.');
+          return interaction.editReply({ embeds: [errorEmbed] });
         }
         if (!player.playing) {
           await player.play();
@@ -250,7 +255,7 @@ module.exports = {
           .setColor('#00FF00')
           .setTitle(t.success.playlistAdded)
           .setDescription(
-            `${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Unknown Playlist'}**`
+            `${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Nieznana Playlista'}**`
           );
         const message = await interaction.editReply({ embeds: [embed] });
         setTimeout(async () => {
@@ -258,32 +263,41 @@ module.exports = {
             await message.delete();
             await sendControlPanel(interaction, player);
           } catch (error) {
-            console.error('Error handling playlist message:', error);
+            console.error('Error handling playlist control panel message:', error);
           }
         }, 5000);
       } else {
         // Pojedynczy utwór
         const track = res.tracks[0];
-        player.queue.add(track);
+        try {
+          await player.queue.add(track);
+        } catch (error) {
+          console.error('Error adding track:', error);
+          const errorEmbed = new EmbedBuilder()
+            .setColor('#FF0000')
+            .setTitle(t.errors.trackAdditionError || 'Błąd dodawania utworu')
+            .setDescription('Wystąpił błąd podczas dodawania utworu.');
+          return interaction.editReply({ embeds: [errorEmbed] });
+        }
         if (!player.playing) {
           await player.play();
         }
         const embed = new EmbedBuilder()
           .setColor('#00FF00')
           .setTitle(t.success.trackAdded)
-          .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Unknown Title'}**`);
+          .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Nieznany tytuł'}**`);
         const message = await interaction.editReply({ embeds: [embed] });
         setTimeout(async () => {
           try {
             await message.delete();
             await sendControlPanel(interaction, player);
           } catch (error) {
-            console.error('Error handling track message:', error);
+            console.error('Error handling track control panel message:', error);
           }
         }, 5000);
       }
 
-      // Na starcie utworu dodajemy aktualny utwór do historii
+      // Dodajemy aktualny utwór do historii przy starcie kolejnego utworu
       lavalink.on('trackStart', (player, track) => {
         if (player.queue.current) {
           player.history.push(player.queue.current);
