@@ -11,6 +11,7 @@ const translations = {
   en: require('../translations/english.json'),
 };
 
+// Funkcja zamieniająca milisekundy na format mm:ss
 function parseDuration(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -18,6 +19,7 @@ function parseDuration(ms) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
+// Funkcja tworząca pasek postępu (progress bar)
 function progressBar(current, total, size = 20) {
   const percent = Math.round((current / total) * 100);
   const filledSize = Math.round((size * current) / total);
@@ -26,6 +28,7 @@ function progressBar(current, total, size = 20) {
   return `${filledBar}${emptyBar} ${percent}%`;
 }
 
+// Funkcja tworząca wiersz przycisków sterujących
 async function createControlRow(player) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -47,6 +50,7 @@ async function createControlRow(player) {
   );
 }
 
+// Funkcja wysyłająca panel sterowania do kanału
 async function sendControlPanel(interaction, player) {
   if (!player.queue.current) return;
 
@@ -72,7 +76,7 @@ async function sendControlPanel(interaction, player) {
     interaction.controlPanelMessage = controlMessage;
 
     const collector = controlMessage.createMessageComponentCollector({
-      // Możesz odkomentować linię poniżej, aby ustawić limit czasowy na zbieranie reakcji (np. 10 minut)
+      // Możesz ustawić limit czasowy zbierania reakcji, np. 10 minut:
       // time: 600000,
     });
 
@@ -86,7 +90,7 @@ async function sendControlPanel(interaction, player) {
             try {
               await playPreviousTrack(player);
             } catch (error) {
-              console.error('Error playing previous track:', error);
+              console.error('Błąd przy odtwarzaniu poprzedniego utworu:', error);
             }
             break;
           case 'pause_resume':
@@ -97,19 +101,19 @@ async function sendControlPanel(interaction, player) {
                 await player.resume();
               }
             } catch (error) {
-              console.error('Error toggling pause state:', error);
+              console.error('Błąd przy przełączaniu pauzy:', error);
             }
             break;
           case 'stop':
             try {
               await player.stopPlaying(true, false);
             } catch (error) {
-              console.error('Error stopping playback:', error);
+              console.error('Błąd przy zatrzymywaniu odtwarzania:', error);
             }
             try {
               await controlMessage.delete();
             } catch (error) {
-              console.error('Error deleting control panel message:', error);
+              console.error('Błąd przy usuwaniu panelu sterowania:', error);
             }
             collector.stop();
             return;
@@ -117,27 +121,28 @@ async function sendControlPanel(interaction, player) {
             try {
               player.skip();
             } catch (error) {
-              console.error('Error skipping track:', error);
+              console.error('Błąd przy pomijaniu utworu:', error);
             }
             break;
         }
         await i.deferUpdate();
         updateControlPanel(interaction, player);
       } catch (error) {
-        console.error('Error handling button interaction:', error);
+        console.error('Błąd obsługi interakcji przycisku:', error);
         await i.deferUpdate();
       }
     });
 
-    // Automatyczna aktualizacja panelu co 10 sekund, jeśli utwór nadal gra
+    // Automatyczna aktualizacja panelu co 10 sekund, gdy utwór nadal gra
     if (player.playing) {
       setTimeout(() => updateControlPanel(interaction, player), 10000);
     }
   } catch (error) {
-    console.error('Error sending control panel:', error);
+    console.error('Błąd przy wysyłaniu panelu sterowania:', error);
   }
 }
 
+// Funkcja aktualizująca panel sterowania (edycja wiadomości z informacjami o utworze)
 async function updateControlPanel(interaction, player) {
   if (!player.queue.current || !interaction.controlPanelMessage) return;
 
@@ -161,13 +166,14 @@ async function updateControlPanel(interaction, player) {
       components: [row],
     });
   } catch (error) {
-    console.error('Error updating control panel:', error);
+    console.error('Błąd aktualizacji panelu sterowania:', error);
   }
 }
 
+// Funkcja odtwarzająca poprzedni utwór (przycisk "previous")
 async function playPreviousTrack(player) {
   if (!player.history || player.history.length === 0) {
-    console.error('No previous track found');
+    console.error('Brak poprzedniego utworu w historii');
     return;
   }
   const previousTrack = player.history.pop();
@@ -176,6 +182,7 @@ async function playPreviousTrack(player) {
 }
 
 module.exports = {
+  // Rejestrujemy polecenie i ustawiamy opcję autouzupełniania dla parametru "query"
   data: new SlashCommandBuilder()
     .setName('play')
     .setDescription('Odtwórz utwór lub playlistę na podstawie zapytania lub linku')
@@ -184,132 +191,158 @@ module.exports = {
         .setName('query')
         .setDescription('Nazwa utworu, URL lub URL playlisty')
         .setRequired(true)
+        .setAutocomplete(true)
     ),
+
+  // Główna funkcja wykonawcza dla komendy /play
   async execute(interaction) {
     const userLang =
       db.prepare('SELECT language FROM user_preferences WHERE user_id = ?')
         .get(interaction.user.id)?.language || 'pl';
     const t = translations[userLang];
     const query = interaction.options.getString('query');
+
     await interaction.deferReply();
 
+    // Sprawdzenie, czy użytkownik jest na kanale głosowym
     const voiceChannel = interaction.member.voice.channel;
     if (!voiceChannel) {
       const embed = new EmbedBuilder()
         .setColor('#FF0000')
-        .setTitle(t.errors.voiceChannelRequired)
-        .setDescription(t.errors.joinVoiceChannel);
+        .setTitle(t.errors.voiceChannelRequired || 'Błąd')
+        .setDescription(t.errors.joinVoiceChannel || 'Dołącz do kanału głosowego!');
       return interaction.editReply({ embeds: [embed] });
     }
 
-    const lavalink = interaction.client.lavalink;
-    if (!lavalink) {
-      const embed = new EmbedBuilder()
-        .setColor('#FF0000')
-        .setTitle(t.errors.lavalinkNotInitialized)
-        .setDescription(t.errors.initializationError);
-      return interaction.editReply({ embeds: [embed] });
-    }
-
-    try {
-      const player = lavalink.createPlayer({
+    // Pobieramy (lub tworzymy) gracza korzystając z systemu client.manager
+    let player = interaction.client.manager.getPlayer(interaction.guild.id);
+    if (!player) {
+      player = interaction.client.manager.createPlayer({
         guildId: interaction.guild.id,
         voiceChannelId: voiceChannel.id,
         textChannelId: interaction.channel.id,
+        selfMute: false,
+        selfDeaf: true,
+        vcRegion: voiceChannel.rtcRegion || undefined,
       });
+    }
+    if (!player.connected) await player.connect();
 
-      if (!player.connected) {
-        await player.connect();
-      }
-
-      player.history = player.history || [];
-
-      const res = await player.search(query, interaction.user);
-
-      if (res.loadType === 'NO_MATCHES' || !res.tracks || res.tracks.length === 0) {
-        const embed = new EmbedBuilder()
-          .setColor('#FF0000')
-          .setTitle(t.errors.noMatches)
-          .setDescription(t.errors.noResultsFound);
-        return interaction.editReply({ embeds: [embed] });
-      }
-
-      // Obsługa playlisty: sprawdzamy, czy wynik posiada playlistInfo lub zapytanie zawiera "list=" oraz zwrócono więcej niż 1 utwór.
-      if (res.playlistInfo || (query.includes('list=') && res.tracks.length > 1)) {
-        try {
-          for (const track of res.tracks) {
-            await player.queue.add(track);
-          }
-        } catch (error) {
-          console.error('Error adding tracks from playlist:', error);
-          const errorEmbed = new EmbedBuilder()
-            .setColor('#FF0000')
-            .setTitle(t.errors.playlistAdditionError || 'Błąd dodawania playlisty')
-            .setDescription('Wystąpił błąd podczas dodawania utworów z playlisty.');
-          return interaction.editReply({ embeds: [errorEmbed] });
-        }
-        if (!player.playing) {
-          await player.play();
-        }
-        const embed = new EmbedBuilder()
-          .setColor('#00FF00')
-          .setTitle(t.success.playlistAdded)
-          .setDescription(
-            `${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Nieznana Playlista'}**`
-          );
-        const message = await interaction.editReply({ embeds: [embed] });
-        setTimeout(async () => {
-          try {
-            await message.delete();
-            await sendControlPanel(interaction, player);
-          } catch (error) {
-            console.error('Error handling playlist control panel message:', error);
-          }
-        }, 5000);
-      } else {
-        // Pojedynczy utwór
-        const track = res.tracks[0];
-        try {
-          await player.queue.add(track);
-        } catch (error) {
-          console.error('Error adding track:', error);
-          const errorEmbed = new EmbedBuilder()
-            .setColor('#FF0000')
-            .setTitle(t.errors.trackAdditionError || 'Błąd dodawania utworu')
-            .setDescription('Wystąpił błąd podczas dodawania utworu.');
-          return interaction.editReply({ embeds: [errorEmbed] });
-        }
-        if (!player.playing) {
-          await player.play();
-        }
-        const embed = new EmbedBuilder()
-          .setColor('#00FF00')
-          .setTitle(t.success.trackAdded)
-          .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Nieznany tytuł'}**`);
-        const message = await interaction.editReply({ embeds: [embed] });
-        setTimeout(async () => {
-          try {
-            await message.delete();
-            await sendControlPanel(interaction, player);
-          } catch (error) {
-            console.error('Error handling track control panel message:', error);
-          }
-        }, 5000);
-      }
-
-      // Dodajemy aktualny utwór do historii przy starcie kolejnego utworu
-      lavalink.on('trackStart', (player, track) => {
-        if (player.queue.current) {
-          player.history.push(player.queue.current);
-        }
-      });
+    // Wyszukiwanie utworu/playlisty
+    let res;
+    try {
+      res = await player.search({ query: query }, interaction.user);
     } catch (error) {
-      console.error('Error in play command:', error);
+      console.error('Błąd podczas wyszukiwania:', error);
       const embed = new EmbedBuilder()
         .setColor('#FF0000')
-        .setTitle(t.errors.playCommandError)
-        .setDescription(t.errors.genericError);
+        .setTitle(t.errors.genericError || 'Błąd')
+        .setDescription(t.errors.playCommandError || 'Wystąpił błąd podczas wykonywania polecenia.');
       return interaction.editReply({ embeds: [embed] });
     }
+
+    if (!res || !res.tracks || res.tracks.length === 0) {
+      const embed = new EmbedBuilder()
+        .setColor('#FF0000')
+        .setTitle(t.errors.search_error || 'Brak wyników')
+        .setDescription(t.errors.noResultsFound || 'Nie znaleziono wyników dla podanego zapytania.');
+      return interaction.editReply({ embeds: [embed] });
+    }
+
+    // Obsługa playlisty – jeżeli mamy playlistę lub zapytanie wskazuje na playlistę (np. zawiera "list=")
+    if (res.loadType === 'playlist' || (query.includes('list=') && res.tracks.length > 1)) {
+      try {
+        for (const track of res.tracks) {
+          await player.queue.add(track);
+        }
+      } catch (error) {
+        console.error('Błąd przy dodawaniu utworów z playlisty:', error);
+        const errorEmbed = new EmbedBuilder()
+          .setColor('#FF0000')
+          .setTitle(t.errors.playlistAdditionError || 'Błąd dodawania playlisty')
+          .setDescription('Wystąpił błąd podczas dodawania utworów z playlisty.');
+        return interaction.editReply({ embeds: [errorEmbed] });
+      }
+      if (!player.playing) await player.play({ paused: false });
+      const embed = new EmbedBuilder()
+        .setColor('#00FF00')
+        .setTitle(t.success.playlistAdded || 'Playlista dodana')
+        .setDescription(
+          `${t.success.addedPlaylistToQueue.replace('{count}', res.tracks.length)}: **${res.playlistInfo?.name || 'Nieznana Playlista'}**`
+        );
+      const message = await interaction.editReply({ embeds: [embed] });
+      setTimeout(async () => {
+        try {
+          await message.delete();
+          await sendControlPanel(interaction, player);
+        } catch (error) {
+          console.error('Błąd przy obsłudze panelu sterowania playlisty:', error);
+        }
+      }, 5000);
+    } else {
+      // Obsługa pojedynczego utworu
+      const track = res.tracks[0];
+      try {
+        await player.queue.add(track);
+      } catch (error) {
+        console.error('Błąd przy dodawaniu utworu:', error);
+        const errorEmbed = new EmbedBuilder()
+          .setColor('#FF0000')
+          .setTitle(t.errors.trackAdditionError || 'Błąd dodawania utworu')
+          .setDescription('Wystąpił błąd podczas dodawania utworu.');
+        return interaction.editReply({ embeds: [errorEmbed] });
+      }
+      if (!player.playing) await player.play({ paused: false });
+      const embed = new EmbedBuilder()
+        .setColor('#00FF00')
+        .setTitle(t.success.trackAdded || 'Utwór dodany')
+        .setDescription(`${t.success.addedToQueue}: **${track.info?.title || 'Nieznany tytuł'}**`);
+      const message = await interaction.editReply({ embeds: [embed] });
+      setTimeout(async () => {
+        try {
+          await message.delete();
+          await sendControlPanel(interaction, player);
+        } catch (error) {
+          console.error('Błąd przy obsłudze panelu sterowania utworu:', error);
+        }
+      }, 5000);
+    }
+
+    // Dodanie bieżącego utworu do historii przy rozpoczęciu kolejnego utworu
+    player.history = player.history || [];
+    player.once('trackStart', (playingTrack) => {
+      if (player.queue.current) {
+        player.history.push(player.queue.current);
+      }
+    });
+  },
+
+  // Funkcja obsługująca autouzupełnianie dla opcji "query"
+  async autocomplete(interaction) {
+    const focusedOption = interaction.options.getFocused(true);
+    if (!focusedOption?.value.trim()) {
+      return interaction.respond([]);
+    }
+
+    let res;
+    try {
+      res = await interaction.client.manager.search({ query: focusedOption.value.trim() }, interaction.user);
+    } catch (error) {
+      console.error('Błąd podczas wyszukiwania dla autouzupełniania:', error);
+      return interaction.respond([]);
+    }
+
+    const songs = [];
+    if (res.loadType === 'search' || res.loadType === 'playlist') {
+      res.tracks.slice(0, 10).forEach((track) => {
+        let name = `${track.info.title} by ${track.info.author}`;
+        if (name.length > 100) name = `${name.substring(0, 97)}...`;
+        songs.push({
+          name: name,
+          value: track.info.uri,
+        });
+      });
+    }
+    return interaction.respond(songs);
   },
 };
