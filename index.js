@@ -609,7 +609,7 @@ await message.reply({
      logger.error(`Błąd przy wykonywaniu prefiksowej komendy ${commandName}:`, { stack: error.stack });
    }
  }
-});
+
 
 // Monitorowanie zmian w serwerach dla aktualizacji metryk
 client.on('guildCreate', guild => {
