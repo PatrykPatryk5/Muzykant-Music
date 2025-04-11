@@ -568,10 +568,10 @@ client.on('messageCreate', async (message) => {
       const serverCount = client.guilds.cache.size;
       const uptimeSeconds = Math.floor((Date.now() - client.metrics.startTime) / 1000);
       const memoryUsage = Math.round(process.memoryUsage().rss / 1024 / 1024);
-      const activeNodes = client.lavalink?.getActiveNodes().length || 0;
+      const activeNodes = [...client.lavalink.nodeManager.nodes.values()].filter(node => node.connected).length;
   
       await message.reply({
-        content: `👋 Cześć ${message.author}! Jestem zaawansowanym botem muzycznym opartym na Lavalink!\n\n` +
+        content: `👋 Cześć ${message.author}! Jestem Muzykant Music, zaawansowanym botem muzycznym opartym na Lavalink!\n\n` +
                  `🎵 Użyj \`/help\` aby zobaczyć dostępne komendy muzyczne.\n` +
                  `📊 Statystyki: ${serverCount} serwerów | ${client.metrics.totalPlays} odtworzonych utworów\n` + 
                  `🎧 Aktywne kanały głosowe: ${client.metrics.activeVoiceConnections} | Węzły Lavalink: ${activeNodes}\n` +
