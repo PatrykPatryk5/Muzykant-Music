@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, GatewayIntentBits, Partials, ActivityType } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials, ActivityType, Events } = require('discord.js');
 const { LavalinkManager } = require('lavalink-client');
 const winston = require('winston');
 const { ClusterClient, getInfo } = require('discord-hybrid-sharding');
@@ -425,29 +425,30 @@ client.once('ready', async () => {
   }, 5 * 60 * 1000); // co 5 minut
 });
 
-// Obsługa interakcji z ulepszoną obsługą błędów i metrykami
-client.on('interactionCreate', async (interaction) => {
-  // Ignorujemy interakcje od botów
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  // Ignorowanie interakcji od botów
   if (interaction.user.bot) return;
   
-  // Bardziej szczegółowe logowanie interakcji w trybie debug
+  // Logowanie interakcji w trybie debug
   logger.debug(`Odebrano interakcję ${interaction.type} od ${interaction.user.tag} (${interaction.user.id}) w ${interaction.guild?.name || 'DM'} (${interaction.guild?.id || 'DM'})`);
   
+  // Sprawdzamy, czy interakcja to komenda
   if (!interaction.isCommand()) return;
-  
+
   const command = client.commands.get(interaction.commandName);
-  
+
   if (!command) {
     logger.warn(`Próba użycia nieistniejącej komendy ${interaction.commandName} przez ${interaction.user.tag}`);
-    return interaction.reply({ 
-      content: 'Ta komenda nie istnieje lub została wyłączona.', 
-      ephemeral: true 
+    return interaction.reply({
+      content: 'Ta komenda nie istnieje lub została wyłączona.',
+      ephemeral: true
     }).catch(error => {
       logger.error(`Nie można odpowiedzieć na interakcję z nieistniejącą komendą: ${error.message}`);
     });
   }
-  
-  // System cooldownów dla komend z dodatkowymi informacjami diagnostycznymi
+
+  // System cooldownów dla komend
   if (command.cooldown) {
     const cooldownTime = command.cooldown * 1000;
     const cooldownKey = `${interaction.user.id}-${command.data.name}`;
@@ -466,21 +467,19 @@ client.on('interactionCreate', async (interaction) => {
         });
       }
     }
-    
+
     client.cooldowns.set(cooldownKey, Date.now());
     setTimeout(() => client.cooldowns.delete(cooldownKey), cooldownTime);
   }
-  
-  // Wykonanie komendy z pełną obsługą błędów i ulepszoną synchronizacją
+
   try {
-    // Aktualizacja metryki i szczegółowe logowanie
     client.metrics.commandsUsed++;
     const startTime = process.hrtime();
-    
+
     // Logowanie użycia komendy
     logger.info(`Użytkownik ${interaction.user.tag} (${interaction.user.id}) użył komendy /${interaction.commandName} na serwerze ${interaction.guild?.name || 'DM'} (${interaction.guild?.id || 'DM'})`);
-    
-    // Sprawdzenie uprawnień - czy bot ma wymagane uprawnienia w kanale
+
+    // Sprawdzenie uprawnień bota
     if (interaction.guild) {
       const botPermissions = interaction.channel.permissionsFor(client.user.id);
       const requiredPermissions = ['SendMessages', 'ViewChannel', 'EmbedLinks'];
@@ -499,7 +498,6 @@ client.on('interactionCreate', async (interaction) => {
         });
       }
     }
-    
     // Jeśli komenda wymaga połączenia z węzłem Lavalink, sprawdzamy jego stan
     if (command.requiresLavalink) {
       const activeNodes = client.lavalink?.getActiveNodes() || [];
@@ -511,20 +509,18 @@ client.on('interactionCreate', async (interaction) => {
         });
       }
     }
-    
-    // Wykonanie komendy z mierzeniem czasu wykonania
+    // Wykonanie komendy z mierzeniem czasu
     await Promise.resolve(command.execute(interaction, client));
-    
-    // Mierzymy czas wykonania komendy
+
     const endTime = process.hrtime(startTime);
     const executionTime = (endTime[0] * 1000 + endTime[1] / 1000000).toFixed(2);
     logger.debug(`Komenda ${interaction.commandName} wykonana w ${executionTime}ms`);
-    
+
   } catch (error) {
     client.metrics.errors++;
     logger.error(`Błąd przy wykonywaniu komendy ${interaction.commandName}:`, { stack: error.stack });
-    
-    // Różne typy odpowiedzi w zależności od stanu interakcji z dodatkową obsługą błędów
+
+    // Obsługa błędów przy odpowiadaniu na interakcję
     try {
       if (interaction.deferred || interaction.replied) {
         await interaction.editReply({
@@ -540,13 +536,13 @@ client.on('interactionCreate', async (interaction) => {
     } catch (replyError) {
       logger.error(`Nie można odpowiedzieć na interakcję po błędzie: ${replyError.message}`);
     }
-    
-    // Dodatkowa analityka błędów
+
     if (process.env.NODE_ENV === 'development') {
       console.error('Szczegóły błędu:', error);
     }
   }
 });
+
 
 // Rozbudowana obsługa wzmianek z informacjami o systemie i bocie
 client.on('messageCreate', async (message) => {
