@@ -316,13 +316,14 @@ module.exports = {
       }, 5000);
     }
 
-    // Dodanie bieżącego utworu do historii przy rozpoczęciu kolejnego utworu
-    player.history = player.history || [];
-    player.once('trackStart', (playingTrack) => {
-      if (player.queue.current) {
-        player.history.push(player.queue.current);
-      }
-    });
+// Dodanie bieżącego utworu do historii przy rozpoczęciu kolejnego utworu
+player.history = player.history || [];
+player.on('trackStart', (playingTrack) => {
+  if (player.queue.current) {
+    player.history.push(player.queue.current);
+  }
+});
+
   },
 
   // Obsługa autouzupełniania dla opcji "query"
