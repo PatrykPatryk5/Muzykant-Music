@@ -4,6 +4,7 @@ const path = require('path');
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const { LavalinkManager } = require('lavalink-client');
 const winston = require('winston');
+const { ClusterClient, getInfo } = require('discord-hybrid-sharding');
 
 // Initialize logger
 const logger = winston.createLogger({
@@ -21,6 +22,8 @@ const logger = winston.createLogger({
 });
 
 const client = new Client({
+  shards: getInfo().SHARD_LIST, // An array of shards that will get spawned
+  shardCount: getInfo().TOTAL_SHARDS, // Total number of shards
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
@@ -160,5 +163,5 @@ client.login(process.env.BOT_TOKEN).then(() => {
   logger.error(`Błąd logowania klienta: ${error.message}`, error);
   process.exit(1);
 });
-
+client.cluster = new ClusterClient(client);
 module.exports = client;
