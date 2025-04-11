@@ -548,7 +548,15 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-if (message.content.trim() === botMention || message.content.trim() === mentionWithNickname) {
+// Rozbudowana obsługa wzmianek z informacjami o systemie i bocie
+client.on('messageCreate', async (message) => {
+  // Ignorujemy wiadomości od botów
+  if (message.author.bot) return;
+  
+  const botMention = `<@${client.user.id}>`;
+  const mentionWithNickname = `<@!${client.user.id}>`;
+  
+  if (message.content.trim() === botMention || message.content.trim() === mentionWithNickname) {
     try {
       logger.debug(`Użytkownik ${message.author.tag} wspomniał bota na serwerze ${message.guild?.name || 'DM'}`);
       
@@ -574,8 +582,8 @@ if (message.content.trim() === botMention || message.content.trim() === mentionW
     } catch (error) {
       logger.error(`Błąd podczas odpowiadania na wzmiankę: ${error.message}`, { stack: error.stack });
     }
-  } 
-
+  }
+});
  
  // Obsługa komend prefiksowych (alternatywa dla slash commands)
  const prefix = process.env.PREFIX || '!';
