@@ -584,33 +584,36 @@ client.on('messageCreate', async (message) => {
     }
   }
 });
- 
- // Obsługa komend prefiksowych (alternatywa dla slash commands)
- const prefix = process.env.PREFIX || '!';
- if (message.content.startsWith(prefix)) {
-   const args = message.content.slice(prefix.length).trim().split(/ +/);
-   const commandName = args.shift().toLowerCase();
-   
-   try {
-     // Znajdź komendę albo alias
-     const command = client.commands.find(cmd => 
-       cmd.data?.name === commandName || 
-       (cmd.aliases && cmd.aliases.includes(commandName))
-     );
-     
-     if (!command) return;
-     
-     logger.debug(`Użytkownik ${message.author.tag} użył prefiksowej komendy ${prefix}${commandName}`);
-     
-     // Sprawdź czy komenda ma obsługę prefiksową
-     if (command.executeMessage) {
-       client.metrics.commandsUsed++;
-       await command.executeMessage(message, args, client);
-     }
-   } catch (error) {
-     logger.error(`Błąd przy wykonywaniu prefiksowej komendy ${commandName}:`, { stack: error.stack });
-   }
- }
+client.on('messageCreate', async (message) => { // Add `async` here
+    // Ignorujemy wiadomości od botów
+    if (message.author.bot) return;
+  
+    const prefix = process.env.PREFIX || '=';
+    if (message.content.startsWith(prefix)) {
+      const args = message.content.slice(prefix.length).trim().split(/ +/);
+      const commandName = args.shift().toLowerCase();
+  
+      try {
+        // Znajdź komendę albo alias
+        const command = client.commands.find(cmd =>
+          cmd.data?.name === commandName ||
+          (cmd.aliases && cmd.aliases.includes(commandName))
+        );
+  
+        if (!command) return;
+  
+        logger.debug(`Użytkownik ${message.author.tag} użył prefiksowej komendy ${prefix}${commandName}`);
+  
+        // Sprawdź czy komenda ma obsługę prefiksową
+        if (command.executeMessage) {
+          client.metrics.commandsUsed++;
+          await command.executeMessage(message, args, client); // This now works because the function is async
+        }
+      } catch (error) {
+        logger.error(`Błąd przy wykonywaniu prefiksowej komendy ${commandName}:`, { stack: error.stack });
+      }
+    }
+  });
 
 
 // Monitorowanie zmian w serwerach dla aktualizacji metryk
