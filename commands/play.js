@@ -11,7 +11,7 @@ const translations = {
   en: require('../translations/english.json'),
 };
 
-// Funkcja zamieniająca milisekundy na format mm:ss
+// Funkcja pomocnicza: zamiana milisekund na format mm:ss
 function parseDuration(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
@@ -19,7 +19,7 @@ function parseDuration(ms) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Funkcja tworząca pasek postępu (progress bar)
+// Funkcja pomocnicza: tworzenie paska postępu
 function progressBar(current, total, size = 20) {
   const percent = Math.round((current / total) * 100);
   const filledSize = Math.round((size * current) / total);
@@ -28,7 +28,7 @@ function progressBar(current, total, size = 20) {
   return `${filledBar}${emptyBar} ${percent}%`;
 }
 
-// Funkcja tworząca wiersz przycisków sterujących
+// Funkcja pomocnicza: tworzenie wiersza przycisków sterujących
 async function createControlRow(player) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -50,7 +50,7 @@ async function createControlRow(player) {
   );
 }
 
-// Funkcja wysyłająca panel sterowania do kanału
+// Funkcja pomocnicza: wysłanie panelu sterowania na kanał tekstowy
 async function sendControlPanel(interaction, player) {
   if (!player.queue.current) return;
 
@@ -76,7 +76,7 @@ async function sendControlPanel(interaction, player) {
     interaction.controlPanelMessage = controlMessage;
 
     const collector = controlMessage.createMessageComponentCollector({
-      // Możesz ustawić limit czasowy zbierania reakcji, np. 10 minut:
+      // Opcjonalnie: ustaw limit czasowy (np. 10 minut)
       // time: 600000,
     });
 
@@ -133,7 +133,7 @@ async function sendControlPanel(interaction, player) {
       }
     });
 
-    // Automatyczna aktualizacja panelu co 10 sekund, gdy utwór nadal gra
+    // Automatyczna aktualizacja panelu co 10 sekund, jeśli utwór nadal gra
     if (player.playing) {
       setTimeout(() => updateControlPanel(interaction, player), 10000);
     }
@@ -142,7 +142,7 @@ async function sendControlPanel(interaction, player) {
   }
 }
 
-// Funkcja aktualizująca panel sterowania (edycja wiadomości z informacjami o utworze)
+// Funkcja pomocnicza: aktualizacja panelu sterowania (edycja istniejącej wiadomości)
 async function updateControlPanel(interaction, player) {
   if (!player.queue.current || !interaction.controlPanelMessage) return;
 
@@ -166,11 +166,11 @@ async function updateControlPanel(interaction, player) {
       components: [row],
     });
   } catch (error) {
-    console.error('Błąd aktualizacji panelu sterowania:', error);
+    console.error('Błąd przy aktualizacji panelu sterowania:', error);
   }
 }
 
-// Funkcja odtwarzająca poprzedni utwór (przycisk "previous")
+// Funkcja pomocnicza: odtwarzanie poprzedniego utworu (przycisk "previous")
 async function playPreviousTrack(player) {
   if (!player.history || player.history.length === 0) {
     console.error('Brak poprzedniego utworu w historii');
@@ -182,7 +182,6 @@ async function playPreviousTrack(player) {
 }
 
 module.exports = {
-  // Rejestrujemy polecenie i ustawiamy opcję autouzupełniania dla parametru "query"
   data: new SlashCommandBuilder()
     .setName('play')
     .setDescription('Odtwórz utwór lub playlistę na podstawie zapytania lub linku')
@@ -194,7 +193,6 @@ module.exports = {
         .setAutocomplete(true)
     ),
 
-  // Główna funkcja wykonawcza dla komendy /play
   async execute(interaction) {
     const userLang =
       db.prepare('SELECT language FROM user_preferences WHERE user_id = ?')
@@ -214,10 +212,20 @@ module.exports = {
       return interaction.editReply({ embeds: [embed] });
     }
 
-    // Pobieramy (lub tworzymy) gracza korzystając z systemu client.manager
-    let player = interaction.client.manager.getPlayer(interaction.guild.id);
+    // Pobieramy obiekt lavalink z klienta
+    const lavalink = interaction.client.lavalink;
+    if (!lavalink) {
+      const embed = new EmbedBuilder()
+        .setColor('#FF0000')
+        .setTitle(t.errors.lavalinkNotInitialized || 'Błąd')
+        .setDescription(t.errors.initializationError || 'Lavalink nie został poprawnie zainicjowany.');
+      return interaction.editReply({ embeds: [embed] });
+    }
+
+    // Pobieramy (lub tworzymy) gracza korzystając z lavalink
+    let player = lavalink.getPlayer(interaction.guild.id);
     if (!player) {
-      player = interaction.client.manager.createPlayer({
+      player = lavalink.createPlayer({
         guildId: interaction.guild.id,
         voiceChannelId: voiceChannel.id,
         textChannelId: interaction.channel.id,
@@ -245,11 +253,11 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setColor('#FF0000')
         .setTitle(t.errors.search_error || 'Brak wyników')
-        .setDescription(t.errors.noResultsFound || 'Nie znaleziono wyników dla podanego zapytania.');
+        .setDescription(t.errors.noResultsFound || 'Nie znaleziono wyników dla zapytania.');
       return interaction.editReply({ embeds: [embed] });
     }
 
-    // Obsługa playlisty – jeżeli mamy playlistę lub zapytanie wskazuje na playlistę (np. zawiera "list=")
+    // Obsługa playlisty: jeśli wynik zawiera playlistę lub zapytanie wskazuje na playlistę (np. "list=")
     if (res.loadType === 'playlist' || (query.includes('list=') && res.tracks.length > 1)) {
       try {
         for (const track of res.tracks) {
@@ -317,7 +325,7 @@ module.exports = {
     });
   },
 
-  // Funkcja obsługująca autouzupełnianie dla opcji "query"
+  // Obsługa autouzupełniania dla opcji "query"
   async autocomplete(interaction) {
     const focusedOption = interaction.options.getFocused(true);
     if (!focusedOption?.value.trim()) {
@@ -326,7 +334,7 @@ module.exports = {
 
     let res;
     try {
-      res = await interaction.client.manager.search({ query: focusedOption.value.trim() }, interaction.user);
+      res = await interaction.client.lavalink.search({ query: focusedOption.value.trim() }, interaction.user);
     } catch (error) {
       console.error('Błąd podczas wyszukiwania dla autouzupełniania:', error);
       return interaction.respond([]);
