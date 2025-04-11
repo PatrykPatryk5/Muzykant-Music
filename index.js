@@ -548,41 +548,33 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-// Rozbudowana obsługa wzmianek z informacjami o systemie i bocie
-client.on('messageCreate', async (message) => {
-  // Ignorujemy wiadomości od botów
-  if (message.author.bot) return;
-  
-  const botMention = `<@${client.user.id}>`;
-  const mentionWithNickname = `<@!${client.user.id}>`;
-  
 if (message.content.trim() === botMention || message.content.trim() === mentionWithNickname) {
-  try {
-    logger.debug(`Użytkownik ${message.author.tag} wspomniał bota na serwerze ${message.guild?.name || 'DM'}`);
-    
-    if (message.guild && !message.channel.permissionsFor(client.user.id).has('SendMessages')) {
-      logger.warn(`Brak uprawnień do wysyłania wiadomości na kanale ${message.channel.name} (${message.channel.id})`);
-      return;
+    try {
+      logger.debug(`Użytkownik ${message.author.tag} wspomniał bota na serwerze ${message.guild?.name || 'DM'}`);
+      
+      if (message.guild && !message.channel.permissionsFor(client.user.id).has('SendMessages')) {
+        logger.warn(`Brak uprawnień do wysyłania wiadomości na kanale ${message.channel.name} (${message.channel.id})`);
+        return;
+      }
+  
+      const serverCount = client.guilds.cache.size;
+      const uptimeSeconds = Math.floor((Date.now() - client.metrics.startTime) / 1000);
+      const memoryUsage = Math.round(process.memoryUsage().rss / 1024 / 1024);
+      const activeNodes = client.lavalink?.getActiveNodes().length || 0;
+  
+      await message.reply({
+        content: `👋 Cześć ${message.author}! Jestem zaawansowanym botem muzycznym opartym na Lavalink!\n\n` +
+                 `🎵 Użyj \`/help\` aby zobaczyć dostępne komendy muzyczne.\n` +
+                 `📊 Statystyki: ${serverCount} serwerów | ${client.metrics.totalPlays} odtworzonych utworów\n` + 
+                 `🎧 Aktywne kanały głosowe: ${client.metrics.activeVoiceConnections} | Węzły Lavalink: ${activeNodes}\n` +
+                 `⚙️ Zużycie RAM: ${memoryUsage} MB | ⏱️ Uptime: ${formatTime(uptimeSeconds)}`,
+        allowedMentions: { repliedUser: true }
+      });
+  
+    } catch (error) {
+      logger.error(`Błąd podczas odpowiadania na wzmiankę: ${error.message}`, { stack: error.stack });
     }
-
-    const serverCount = client.guilds.cache.size;
-    const uptimeSeconds = Math.floor((Date.now() - client.metrics.startTime) / 1000);
-    const memoryUsage = Math.round(process.memoryUsage().rss / 1024 / 1024);
-    const activeNodes = client.lavalink?.getActiveNodes().length || 0;
-
-    await message.reply({
-      content: `👋 Cześć ${message.author}! Jestem zaawansowanym botem muzycznym opartym na Lavalink!\n\n` +
-               `🎵 Użyj \`/help\` aby zobaczyć dostępne komendy muzyczne.\n` +
-               `📊 Statystyki: ${serverCount} serwerów | ${client.metrics.totalPlays} odtworzonych utworów\n` + 
-               `🎧 Aktywne kanały głosowe: ${client.metrics.activeVoiceConnections} | Węzły Lavalink: ${activeNodes}\n` +
-               `⚙️ Zużycie RAM: ${memoryUsage} MB | ⏱️ Uptime: ${formatTime(uptimeSeconds)}`,
-      allowedMentions: { repliedUser: true }
-    });
-
-  } catch (error) {
-    logger.error(`Błąd podczas odpowiadania na wzmiankę: ${error.message}`, { stack: error.stack });
-  }
-}
+  } 
 
  
  // Obsługa komend prefiksowych (alternatywa dla slash commands)
