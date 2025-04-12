@@ -18,6 +18,11 @@
 
 name: "Microsoft Defender For Devops"
 
+permissions:
+  contents: read
+  security-events: write  # wymagane do przesyłania SARIF do zakładki Security
+  pull-requests: read
+
 on:
   push:
     branches: [ "main" ]
