@@ -13,11 +13,16 @@
     "winston": "^3.17.0",
     "colors": "^1.4.0"
   },
+  "devDependencies": {
+    "eslint": "^8.56.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
     "start": "node shard.js",
-    "deploy": "node deploy-commands.js"
+    "deploy": "node deploy-commands.js",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix"
   }
 }
