@@ -6,7 +6,7 @@
   "license": "CC BY-NC-SA",
   "dependencies": {
     "better-sqlite3": "^11.9.1",
-    "discord.js": "^14.18.0",
+    "discord.js": "^14.19.0",
     "dotenv": "^16.4.7",
     "lavalink-client": "^2.5.0",
     "discord-hybrid-sharding": "^2.2.6",
