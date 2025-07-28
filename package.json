@@ -14,7 +14,7 @@
     "colors": "^1.4.0"
   },
   "devDependencies": {
-    "eslint": "^9.24.0",
+    "eslint": "^9.32.0",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
     "@eslint/eslintrc": "^3.3.1",
